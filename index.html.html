@@ -1,0 +1,2913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- PAGE TITLE: Change this to match your team name/number -->
+  <title>FRC Electrical — Learn the Robot</title>
+
+  <!-- GOOGLE FONTS: These load the display and body fonts. Change the font names if you want different typography. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       CSS CUSTOM PROPERTIES (VARIABLES)
+       To change the site's color scheme, edit the values below.
+       --accent-primary = main highlight color (electric blue)
+       --accent-secondary = secondary highlight (neon green)
+       --bg-dark = main background color
+       --bg-card = card/panel background
+       ============================================================ */
+    :root {
+      --accent-primary: #00d4ff;
+      --accent-secondary: #39ff14;
+      --accent-warn: #ff6b35;
+      --accent-danger: #ff2d55;
+      --bg-dark: #080c14;
+      --bg-mid: #0d1421;
+      --bg-card: #111827;
+      --bg-card2: #161f30;
+      --border: rgba(0, 212, 255, 0.18);
+      --border-bright: rgba(0, 212, 255, 0.5);
+      --text-main: #e8f4fd;
+      --text-muted: #7a9bb5;
+      --text-dim: #4a6a85;
+      --font-display: 'Orbitron', monospace;
+      --font-mono: 'Share Tech Mono', monospace;
+      --font-body: 'Exo 2', sans-serif;
+      --radius: 10px;
+      --radius-lg: 18px;
+      --shadow: 0 4px 32px rgba(0,0,0,0.6);
+      --glow: 0 0 24px rgba(0, 212, 255, 0.25);
+    }
+
+    /* ============================================================
+       GLOBAL RESET & BASE STYLES
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    a { color: var(--accent-primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1, h2, h3, h4, h5 { font-family: var(--font-display); letter-spacing: 0.03em; line-height: 1.2; }
+    code, .mono { font-family: var(--font-mono); }
+    img { max-width: 100%; border-radius: var(--radius); }
+    ul, ol { padding-left: 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    /* ============================================================
+       CIRCUIT BOARD BACKGROUND PATTERN
+       This creates the faint grid lines in the background.
+       To remove, delete the body::before block.
+       ============================================================ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ============================================================
+       LAYOUT WRAPPER
+       ============================================================ */
+    #app { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ============================================================
+       TOP NAVIGATION BAR
+       To add a new nav link, copy one <a> tag inside #nav-links and
+       change the data-page value and text.
+       ============================================================ */
+    #topnav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(8,12,20,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+      height: 60px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+    }
+    #nav-logo {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--accent-primary);
+      white-space: nowrap;
+      cursor: pointer;
+      text-shadow: 0 0 12px rgba(0,212,255,0.5);
+    }
+    /* TEAM NUMBER: Change "XXXX" to your team number -->*/
+    #nav-logo span { color: var(--accent-secondary); }
+    #nav-links {
+      display: flex; gap: 0.25rem; flex-wrap: wrap;
+      flex: 1; overflow-x: auto; scrollbar-width: none;
+    }
+    #nav-links::-webkit-scrollbar { display: none; }
+    .nav-link {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+    }
+    .nav-link:hover, .nav-link.active {
+      color: var(--accent-primary);
+      border-color: var(--border);
+      background: rgba(0,212,255,0.07);
+    }
+    .nav-link.active { color: var(--accent-primary); border-color: var(--accent-primary); }
+    #nav-right { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+
+    /* MENTOR TOGGLE: This switches between student and mentor view */
+    #mentor-toggle {
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.35rem 0.8rem;
+      border-radius: 6px;
+      border: 1px solid var(--accent-warn);
+      background: transparent;
+      color: var(--accent-warn);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.08em;
+    }
+    #mentor-toggle.active { background: var(--accent-warn); color: #000; }
+    #progress-pill {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 99px;
+      border: 1px solid var(--accent-secondary);
+      color: var(--accent-secondary);
+      cursor: pointer;
+    }
+
+    /* ============================================================
+       MAIN CONTENT AREA
+       ============================================================ */
+    #main-content { flex: 1; padding: 2rem 1rem; max-width: 960px; margin: 0 auto; width: 100%; }
+
+    /* ============================================================
+       PAGE SECTIONS — each .page div is one "page" of the site.
+       To show/hide pages, JavaScript sets display:none or display:block.
+       ============================================================ */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ============================================================
+       HERO SECTION (Home Page)
+       ============================================================ */
+    .hero {
+      text-align: center;
+      padding: 3rem 1rem 2.5rem;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.3rem 1rem;
+      border: 1px solid var(--accent-secondary);
+      border-radius: 99px;
+      color: var(--accent-secondary);
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.12em;
+    }
+    .hero h1 {
+      font-size: clamp(1.8rem, 5vw, 3.5rem);
+      color: var(--accent-primary);
+      text-shadow: 0 0 40px rgba(0,212,255,0.4);
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    .hero-cta {
+      display: inline-block;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 0.8rem 2rem;
+      border-radius: var(--radius);
+      background: var(--accent-primary);
+      color: #000;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      box-shadow: 0 0 20px rgba(0,212,255,0.4);
+    }
+    .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 0 32px rgba(0,212,255,0.6); }
+
+    /* ============================================================
+       SAFETY BANNER — always visible, shown prominently on home page
+       ============================================================ */
+    .safety-banner {
+      background: linear-gradient(135deg, rgba(255,45,85,0.15), rgba(255,107,53,0.1));
+      border: 1px solid var(--accent-danger);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .safety-banner::before {
+      content: '⚡';
+      position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%);
+      font-size: 3rem; opacity: 0.12;
+    }
+    .safety-banner h3 {
+      font-family: var(--font-display);
+      color: var(--accent-danger);
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+    .safety-banner ul { color: var(--text-main); }
+
+    /* ============================================================
+       CARD GRID — used for lesson listings, component listings, etc.
+       ============================================================ */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,212,255,0.04), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .card:hover { border-color: var(--border-bright); transform: translateY(-2px); box-shadow: var(--glow); }
+    .card:hover::before { opacity: 1; }
+    .card-number {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--accent-primary);
+      opacity: 0.7;
+      margin-bottom: 0.5rem;
+    }
+    .card h3 { font-size: 0.9rem; color: var(--text-main); margin-bottom: 0.5rem; }
+    .card p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .card-complete {
+      position: absolute; top: 1rem; right: 1rem;
+      font-size: 0.7rem;
+      background: rgba(57,255,20,0.15);
+      color: var(--accent-secondary);
+      border: 1px solid var(--accent-secondary);
+      border-radius: 99px;
+      padding: 0.15rem 0.5rem;
+      font-family: var(--font-mono);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .card.done .card-complete { opacity: 1; }
+    .card.done { border-color: rgba(57,255,20,0.3); }
+
+    /* ============================================================
+       LESSON / CONTENT PAGE STYLES
+       ============================================================ */
+    .lesson-header {
+      padding: 2rem 0 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    .lesson-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--accent-primary);
+      letter-spacing: 0.12em;
+      margin-bottom: 0.6rem;
+    }
+    .lesson-header h1 { font-size: clamp(1.4rem, 4vw, 2.4rem); color: var(--text-main); }
+    .lesson-header .subtitle { color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem; }
+
+    /* CONTENT SECTIONS within a lesson */
+    .content-section { margin-bottom: 2.5rem; }
+    .content-section h2 {
+      font-size: 1.1rem;
+      color: var(--accent-primary);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .content-section h3 { font-size: 0.95rem; color: var(--text-main); margin: 1.2rem 0 0.6rem; }
+    .content-section p { color: var(--text-muted); margin-bottom: 0.85rem; font-size: 0.95rem; }
+    .content-section strong { color: var(--text-main); }
+
+    /* ANALOGY BOX — highlighted box for analogies */
+    .analogy-box {
+      background: linear-gradient(135deg, rgba(0,212,255,0.07), rgba(0,212,255,0.03));
+      border-left: 3px solid var(--accent-primary);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      font-size: 0.92rem;
+    }
+    .analogy-box .label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--accent-primary);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+    }
+    .analogy-box p { color: var(--text-main); margin: 0; }
+
+    /* TIP BOX */
+    .tip-box {
+      background: rgba(57,255,20,0.06);
+      border-left: 3px solid var(--accent-secondary);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      font-size: 0.92rem;
+    }
+    .tip-box .label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent-secondary); letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .tip-box p { color: var(--text-main); margin: 0; }
+
+    /* WARNING BOX */
+    .warn-box {
+      background: rgba(255,107,53,0.08);
+      border-left: 3px solid var(--accent-warn);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      font-size: 0.92rem;
+    }
+    .warn-box .label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent-warn); letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .warn-box p { color: var(--text-main); margin: 0; }
+
+    /* MENTOR NOTE — only visible when mentor mode is on */
+    .mentor-note {
+      background: rgba(255,107,53,0.1);
+      border: 1px dashed var(--accent-warn);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      font-size: 0.88rem;
+      display: none; /* Hidden by default; shown when mentor mode is ON */
+    }
+    .mentor-note .label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent-warn); letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .mentor-note p { color: var(--text-muted); margin: 0; }
+    body.mentor-mode .mentor-note { display: block; }
+
+    /* BACK REFERENCE — "As we learned in Lesson X" callout */
+    .back-ref {
+      background: rgba(0,212,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 1rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin: 0.75rem 0;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .back-ref:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+    .back-ref::before { content: '↩ '; }
+
+    /* COMPONENT SPEC TABLE */
+    .spec-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.88rem; }
+    .spec-table th, .spec-table td { padding: 0.65rem 1rem; border: 1px solid var(--border); text-align: left; }
+    .spec-table th { background: rgba(0,212,255,0.08); color: var(--accent-primary); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; }
+    .spec-table td { color: var(--text-muted); }
+    .spec-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+    /* POWER FLOW DIAGRAM (text-based) */
+    .power-flow {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-primary);
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 2;
+    }
+    .power-flow .arrow { color: var(--text-dim); }
+    .power-flow .node { color: var(--accent-primary); }
+    .power-flow .note { color: var(--text-muted); font-size: 0.72rem; }
+
+    /* IMAGE PLACEHOLDER STYLE */
+    .img-placeholder {
+      background: var(--bg-card2);
+      border: 2px dashed var(--border-bright);
+      border-radius: var(--radius);
+      padding: 2.5rem 1rem;
+      text-align: center;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      margin: 1rem 0;
+    }
+    .img-placeholder .ph-icon { font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.4; }
+    .img-placeholder .ph-label { color: var(--text-muted); font-size: 0.72rem; margin-top: 0.35rem; }
+
+    /* ============================================================
+       QUIZ STYLES
+       ============================================================ */
+    .quiz-section {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .quiz-section h2 {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      color: var(--accent-secondary);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(57,255,20,0.2);
+    }
+    .quiz-q { margin-bottom: 1.5rem; }
+    .quiz-q .q-text { font-size: 0.92rem; color: var(--text-main); margin-bottom: 0.75rem; font-weight: 600; }
+    .quiz-option {
+      display: block;
+      padding: 0.6rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.4rem;
+      cursor: pointer;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      transition: all 0.15s;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+    .quiz-option:hover { border-color: var(--accent-primary); color: var(--text-main); background: rgba(0,212,255,0.05); }
+    .quiz-option.correct { border-color: var(--accent-secondary); background: rgba(57,255,20,0.1); color: var(--accent-secondary); }
+    .quiz-option.wrong { border-color: var(--accent-danger); background: rgba(255,45,85,0.1); color: var(--accent-danger); }
+    .quiz-feedback { font-size: 0.82rem; margin-top: 0.5rem; padding: 0.5rem 0.75rem; border-radius: 6px; }
+    .quiz-feedback.correct { background: rgba(57,255,20,0.08); color: var(--accent-secondary); }
+    .quiz-feedback.wrong { background: rgba(255,45,85,0.08); color: var(--accent-danger); }
+    .quiz-submit {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+      padding: 0.65rem 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--accent-secondary);
+      background: transparent;
+      color: var(--accent-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+    .quiz-submit:hover { background: var(--accent-secondary); color: #000; }
+    .quiz-score {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent-primary);
+      margin-top: 1rem;
+      display: none;
+    }
+
+    /* ANSWER KEY — only shown in mentor mode -->*/
+    .answer-key {
+      background: rgba(255,107,53,0.06);
+      border: 1px dashed var(--accent-warn);
+      border-radius: var(--radius);
+      padding: 0.85rem 1.1rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      display: none;
+    }
+    body.mentor-mode .answer-key { display: block; }
+    .answer-key .ak-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent-warn); letter-spacing: 0.08em; margin-bottom: 0.35rem; }
+
+    /* ============================================================
+       LESSON COMPLETE BUTTON & PROGRESS BAR
+       ============================================================ */
+    .lesson-complete-btn {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 0.75rem 1.75rem;
+      border-radius: var(--radius);
+      border: 2px solid var(--accent-secondary);
+      background: transparent;
+      color: var(--accent-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 1.5rem;
+    }
+    .lesson-complete-btn:hover { background: var(--accent-secondary); color: #000; box-shadow: 0 0 20px rgba(57,255,20,0.4); }
+    .lesson-complete-btn.done { background: rgba(57,255,20,0.15); }
+
+    /* PROGRESS MODAL */
+    #progress-modal {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      display: none; align-items: center; justify-content: center;
+    }
+    #progress-modal.open { display: flex; }
+    #progress-inner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      max-width: 520px;
+      width: 90%;
+      box-shadow: var(--shadow), var(--glow);
+    }
+    #progress-inner h2 { font-family: var(--font-display); font-size: 1rem; color: var(--accent-primary); margin-bottom: 1.25rem; }
+    .progress-bar-outer { background: var(--bg-dark); border-radius: 99px; height: 10px; overflow: hidden; margin-bottom: 0.5rem; }
+    .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); border-radius: 99px; transition: width 0.5s; }
+    .progress-list { margin-top: 1rem; }
+    .progress-item { display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+    .progress-item .pi-name { color: var(--text-muted); }
+    .progress-item .pi-status { font-family: var(--font-mono); font-size: 0.72rem; }
+    .pi-status.done { color: var(--accent-secondary); }
+    .pi-status.pending { color: var(--text-dim); }
+    .close-modal {
+      margin-top: 1.25rem;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 0.55rem 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .close-modal:hover { color: var(--text-main); border-color: var(--text-muted); }
+
+    /* ============================================================
+       GLOSSARY PAGE STYLES
+       ============================================================ */
+    .glossary-grid { columns: 1; gap: 1rem; }
+    @media (min-width: 640px) { .glossary-grid { columns: 2; } }
+    .glossary-item { break-inside: avoid; margin-bottom: 1rem; }
+    .glossary-term {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      color: var(--accent-primary);
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.05em;
+    }
+    .glossary-def { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ============================================================
+       CHECKLIST PAGE STYLES
+       ============================================================ */
+    .checklist-section { margin-bottom: 2.5rem; }
+    .checklist-section h2 { font-size: 1rem; color: var(--accent-warn); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,107,53,0.3); font-family: var(--font-display); letter-spacing: 0.05em; }
+    .checklist-item {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--bg-card);
+    }
+    .checklist-item:hover { border-color: var(--border-bright); }
+    .checklist-item.checked { border-color: rgba(57,255,20,0.4); background: rgba(57,255,20,0.05); }
+    .checklist-item input[type="checkbox"] { margin-top: 3px; accent-color: var(--accent-secondary); flex-shrink: 0; width: 16px; height: 16px; cursor: pointer; }
+    .checklist-item label { cursor: pointer; font-size: 0.9rem; color: var(--text-muted); }
+    .checklist-item.checked label { color: var(--accent-secondary); text-decoration: line-through; opacity: 0.7; }
+    .reset-checklist {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 0.45rem 1rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .reset-checklist:hover { color: var(--text-muted); border-color: var(--text-dim); }
+
+    /* ============================================================
+       RESOURCES / LINKS STYLES
+       ============================================================ */
+    .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+    .resource-link {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: all 0.15s;
+      background: var(--bg-card);
+    }
+    .resource-link:hover { border-color: var(--accent-primary); color: var(--accent-primary); text-decoration: none; }
+    .resource-link .rl-icon { font-size: 1.1rem; }
+
+    /* ============================================================
+       WHAT'S NEW / CHANGELOG SECTION
+       ============================================================ */
+    .changelog-item {
+      border-left: 2px solid var(--accent-primary);
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .changelog-item .cl-date { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-primary); margin-bottom: 0.25rem; }
+    .changelog-item .cl-text { font-size: 0.88rem; color: var(--text-muted); }
+
+    /* ============================================================
+       SECTION DIVIDER
+       ============================================================ */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    /* ============================================================
+       COMPONENT CARD (used in the "not used" section)
+       ============================================================ */
+    .component-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .component-card h3 { font-size: 0.9rem; color: var(--accent-primary); margin-bottom: 0.5rem; font-family: var(--font-display); letter-spacing: 0.04em; }
+    .component-card .cc-tag { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); border: 1px solid var(--border); border-radius: 99px; padding: 0.1rem 0.5rem; display: inline-block; margin-bottom: 0.75rem; }
+    .component-card p { font-size: 0.88rem; color: var(--text-muted); }
+
+    /* ============================================================
+       TAG BADGES
+       ============================================================ */
+    .tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.63rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      border: 1px solid;
+      margin-right: 0.35rem;
+      letter-spacing: 0.06em;
+    }
+    .tag-blue { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(0,212,255,0.07); }
+    .tag-green { border-color: var(--accent-secondary); color: var(--accent-secondary); background: rgba(57,255,20,0.07); }
+    .tag-orange { border-color: var(--accent-warn); color: var(--accent-warn); background: rgba(255,107,53,0.07); }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+    }
+
+    /* ============================================================
+       MOBILE RESPONSIVE ADJUSTMENTS
+       ============================================================ */
+    @media (max-width: 640px) {
+      #main-content { padding: 1.25rem 0.75rem; }
+      .hero h1 { font-size: 1.6rem; }
+      .card-grid { grid-template-columns: 1fr; }
+      #topnav { padding: 0 0.75rem; gap: 0.5rem; }
+      #nav-logo { font-size: 0.85rem; }
+    }
+
+    /* ============================================================
+       ANIMATIONS
+       ============================================================ */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .page.active { animation: fadeIn 0.3s ease; }
+    @keyframes glow-pulse {
+      0%, 100% { text-shadow: 0 0 20px rgba(0,212,255,0.3); }
+      50% { text-shadow: 0 0 40px rgba(0,212,255,0.7); }
+    }
+    .hero h1 { animation: glow-pulse 4s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     APP ROOT
+     ============================================================ -->
+<div id="app">
+
+  <!-- ============================================================
+       TOP NAVIGATION BAR
+       To add a nav link: copy a <button class="nav-link"> and
+       change data-page="YOUR_PAGE_ID" and the button text.
+       ============================================================ -->
+  <nav id="topnav">
+    <!-- SITE LOGO / NAME: Change "XXXX" to your team number -->
+    <div id="nav-logo" onclick="showPage('home')">⚡ FRC <span>ELECTRICAL</span></div>
+
+    <!-- NAV LINKS: Each button shows one page when clicked -->
+    <div id="nav-links">
+      <button class="nav-link active" data-page="home" onclick="showPage('home')">HOME</button>
+      <button class="nav-link" data-page="lessons" onclick="showPage('lessons')">LESSONS</button>
+      <button class="nav-link" data-page="components" onclick="showPage('components')">COMPONENTS</button>
+      <button class="nav-link" data-page="not-used" onclick="showPage('not-used')">NOT USED</button>
+      <button class="nav-link" data-page="wiring" onclick="showPage('wiring')">WIRING</button>
+      <button class="nav-link" data-page="glossary" onclick="showPage('glossary')">GLOSSARY</button>
+      <button class="nav-link" data-page="checklists" onclick="showPage('checklists')">CHECKLISTS</button>
+      <button class="nav-link" data-page="changelog" onclick="showPage('changelog')">WHAT'S NEW</button>
+    </div>
+
+    <div id="nav-right">
+      <!-- PROGRESS PILL: Click to open the progress tracker modal -->
+      <div id="progress-pill" onclick="openProgress()">⬜ 0%</div>
+      <!-- MENTOR TOGGLE: Click to enable mentor mode (shows answer keys + notes) -->
+      <button id="mentor-toggle" onclick="toggleMentor()">MENTOR MODE</button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT AREA: All pages live here -->
+  <main id="main-content">
+
+    <!-- ============================================================
+         PAGE: HOME
+         ============================================================ -->
+    <section id="page-home" class="page active">
+
+      <!-- HERO SECTION -->
+      <div class="hero">
+        <!-- HERO BADGE: Change this short tagline -->
+        <div class="hero-badge">FRC ELECTRICAL SUBTEAM — BEGINNER GUIDE</div>
+
+        <!-- HERO TITLE: Change this main headline -->
+        <h1>POWER UP YOUR KNOWLEDGE</h1>
+
+        <!-- HERO SUBTITLE: Change this description -->
+        <p>Everything you need to understand the electrical system of an FRC robot — from zero experience to competition-ready. No background required.</p>
+
+        <!-- CTA BUTTON: This takes users to the lessons page -->
+        <button class="hero-cta" onclick="showPage('lessons')">START LEARNING →</button>
+      </div>
+
+      <!-- ============================================================
+           SAFETY BANNER — shown on the home page
+           Edit the safety rules below as needed.
+           ============================================================ -->
+      <div class="safety-banner">
+        <h3>⚡ BEFORE YOU TOUCH THE ROBOT</h3>
+        <ul>
+          <li><strong>Always disconnect the battery</strong> before working on any electrical component.</li>
+          <li><strong>Never work alone.</strong> Always have a second person present.</li>
+          <li>Do not wear loose clothing, dangling jewelry, or lanyards near spinning motors.</li>
+          <li>Ask a mentor before connecting or disconnecting anything you're unsure about.</li>
+          <li>If you see sparks, smoke, or smell burning — immediately disconnect the battery and get a mentor.</li>
+          <li>The main breaker is your best friend in an emergency. Know where it is at all times.</li>
+        </ul>
+      </div>
+
+      <!-- QUICK LESSON OVERVIEW CARDS ON HOME PAGE -->
+      <h2 style="font-family:var(--font-display);font-size:0.9rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:1rem;">QUICK START LESSONS</h2>
+      <div class="card-grid">
+
+        <!-- CARD: Lesson 1 -->
+        <div class="card" onclick="showLesson('l1')">
+          <div class="card-number">LESSON 01</div>
+          <h3>What Is the Electrical System?</h3>
+          <p>The big picture — how all the parts fit together before you learn any details.</p>
+          <div class="card-complete">✓ DONE</div>
+        </div>
+
+        <!-- CARD: Lesson 2 -->
+        <div class="card" onclick="showLesson('l2')">
+          <div class="card-number">LESSON 02</div>
+          <h3>Power — Battery to Everything</h3>
+          <p>How electricity flows from the battery through the robot like water in a pipe.</p>
+          <div class="card-complete">✓ DONE</div>
+        </div>
+
+        <!-- CARD: Lesson 3 -->
+        <div class="card" onclick="showLesson('l3')">
+          <div class="card-number">LESSON 03</div>
+          <h3>The Brain: roboRIO 2.0</h3>
+          <p>Meet the robot's computer — what it does and why every other part depends on it.</p>
+          <div class="card-complete">✓ DONE</div>
+        </div>
+
+        <!-- CARD: Lesson 4 -->
+        <div class="card" onclick="showLesson('l4')">
+          <div class="card-number">LESSON 04</div>
+          <h3>CAN Bus — The Nervous System</h3>
+          <p>The communication highway that lets all components talk to the brain.</p>
+          <div class="card-complete">✓ DONE</div>
+        </div>
+
+        <!-- CARD: Lesson 5 -->
+        <div class="card" onclick="showLesson('l5')">
+          <div class="card-number">LESSON 05</div>
+          <h3>Motors & Movement</h3>
+          <p>Kraken X44, X60, and swerve modules — how robots actually move.</p>
+          <div class="card-complete">✓ DONE</div>
+        </div>
+
+        <!-- CARD: Lesson 6 -->
+        <div class="card" onclick="showLesson('l6')">
+          <div class="card-number">LESSON 06</div>
+          <h3>Sensors & Feedback</h3>
+          <p>Pigeon 2.0, CAN Range, and CANANDCOLOR — how the robot senses the world.</p>
+          <div class="card-complete">✓ DONE</div>
+        </div>
+
+        <!-- CARD: Lesson 7 -->
+        <div class="card" onclick="showLesson('l7')">
+          <div class="card-number">LESSON 07</div>
+          <h3>Vision & Communication</h3>
+          <p>Orange Pi 5, cameras, radio, and Ethernet — eyes and communication for the robot.</p>
+          <div class="card-complete">✓ DONE</div>
+        </div>
+
+        <!-- CARD: Lesson 8 -->
+        <div class="card" onclick="showLesson('l8')">
+          <div class="card-number">LESSON 08</div>
+          <h3>Putting It All Together</h3>
+          <p>Review every component as a system, see the full wiring map, and test your knowledge.</p>
+          <div class="card-complete">✓ DONE</div>
+        </div>
+      </div>
+
+      <!-- QUICK LINK SECTION -->
+      <hr class="divider" />
+      <h2 style="font-family:var(--font-display);font-size:0.9rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:1rem;">QUICK LINKS</h2>
+      <div class="resource-grid">
+        <a class="resource-link" href="https://docs.wpilib.org" target="_blank"><span class="rl-icon">📚</span> WPILib Documentation</a>
+        <a class="resource-link" href="https://store.ctr-electronics.com/software" target="_blank"><span class="rl-icon">🔧</span> CTRE Phoenix Docs</a>
+        <a class="resource-link" href="https://docs.revrobotics.com" target="_blank"><span class="rl-icon">⚡</span> REV Robotics Docs</a>
+        <a class="resource-link" href="https://www.chiefdelphi.com" target="_blank"><span class="rl-icon">💬</span> Chief Delphi Forum</a>
+        <a class="resource-link" href="https://frc-docs.readthedocs.io" target="_blank"><span class="rl-icon">📖</span> FRC Game Manual</a>
+        <a class="resource-link" href="#" onclick="showPage('checklists');return false;"><span class="rl-icon">✅</span> Safety Checklists</a>
+      </div>
+
+    </section><!-- END PAGE: HOME -->
+
+
+    <!-- ============================================================
+         PAGE: LESSONS (lesson index)
+         ============================================================ -->
+    <section id="page-lessons" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">CURRICULUM</div>
+        <h1>ALL LESSONS</h1>
+        <p class="subtitle">Start at Lesson 1 and work your way through. Each lesson builds on the last.</p>
+      </div>
+      <div class="card-grid">
+        <div class="card" onclick="showLesson('l1')"><div class="card-number">01</div><h3>What Is the Electrical System?</h3><p>The 30,000-foot view before you learn the details.</p><div class="card-complete">✓ DONE</div></div>
+        <div class="card" onclick="showLesson('l2')"><div class="card-number">02</div><h3>Power — Battery to Everything</h3><p>How electricity flows from the battery to every component.</p><div class="card-complete">✓ DONE</div></div>
+        <div class="card" onclick="showLesson('l3')"><div class="card-number">03</div><h3>The Brain: roboRIO 2.0</h3><p>The robot's main computer and why everything depends on it.</p><div class="card-complete">✓ DONE</div></div>
+        <div class="card" onclick="showLesson('l4')"><div class="card-number">04</div><h3>CAN Bus — The Nervous System</h3><p>How components talk to each other over a shared wire network.</p><div class="card-complete">✓ DONE</div></div>
+        <div class="card" onclick="showLesson('l5')"><div class="card-number">05</div><h3>Motors & Movement</h3><p>Kraken motors, swerve modules, and how robots drive.</p><div class="card-complete">✓ DONE</div></div>
+        <div class="card" onclick="showLesson('l6')"><div class="card-number">06</div><h3>Sensors & Feedback</h3><p>Pigeon 2.0, CAN Range, CANANDCOLOR, and other sensors.</p><div class="card-complete">✓ DONE</div></div>
+        <div class="card" onclick="showLesson('l7')"><div class="card-number">07</div><h3>Vision & Communication</h3><p>Orange Pi 5, cameras, radio, Ethernet, and the C Buck Converter.</p><div class="card-complete">✓ DONE</div></div>
+        <div class="card" onclick="showLesson('l8')"><div class="card-number">08</div><h3>Putting It All Together</h3><p>Full system review, complete wiring map, and final quiz.</p><div class="card-complete">✓ DONE</div></div>
+      </div>
+    </section><!-- END PAGE: LESSONS -->
+
+
+    <!-- ============================================================
+         LESSON 1: What Is the Electrical System?
+         ============================================================ -->
+    <section id="page-l1" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">LESSON 01 — INTRODUCTION</div>
+        <h1>What Is the Electrical System?</h1>
+        <p class="subtitle">The big picture before you learn the details. No experience needed.</p>
+      </div>
+
+      <!-- SECTION: The Big Idea -->
+      <div class="content-section">
+        <h2>The Big Idea</h2>
+        <p>Welcome to the electrical subteam. If you've never touched a robot, never wired anything, and have zero electronics experience — <strong>this is exactly the right place to start.</strong> We're going to build your knowledge from the ground up, one layer at a time.</p>
+        <p>Let's start with the most important question: <em>what does the electrical system actually do?</em></p>
+        <p>Think about a car. A car has an engine that makes power, a steering wheel that tells it where to go, sensors that warn you when something is wrong, and lights so you can see at night. Every single one of those things relies on electricity. The robot is the same way.</p>
+
+        <!-- ANALOGY BOX: Change the analogy text if you want to use a different comparison -->
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY</div>
+          <p>The electrical system is like the nervous system of a human body. Your brain sends signals through nerves to move your muscles. The robot's electrical system sends signals from a computer through wires to motors. Without it, the robot is just a pile of metal that can't do anything.</p>
+        </div>
+
+        <p>The electrical subteam's job is to <strong>safely power the robot</strong>, make sure all the components can <strong>talk to each other</strong>, and ensure the <strong>driver can control everything</strong> from across the field.</p>
+      </div>
+
+      <!-- SECTION: Meet the Team -->
+      <div class="content-section">
+        <h2>The Three Jobs of Electrical</h2>
+        <p>Everything the electrical subteam does falls into one of these three jobs:</p>
+        <h3>1. Power Distribution</h3>
+        <p>Getting the right amount of electricity from the battery to every component that needs it. This is like plumbing — you need the right pipe sizes, and water (electricity) needs to reach every room (component).</p>
+        <h3>2. Communication</h3>
+        <p>Making sure the robot's brain (computer) can talk to the motors, sensors, and everything else. Without communication, the brain can't tell the motors to spin, and the sensors can't tell the brain what they detect.</p>
+        <h3>3. Control</h3>
+        <p>Connecting the driver station (the laptop at the field) to the robot so the human driver's joystick commands actually move the robot. This involves the radio, which is like a Wi-Fi router for the robot.</p>
+      </div>
+
+      <!-- SECTION: The Main Components (preview) -->
+      <div class="content-section">
+        <h2>Your First Look at the Components</h2>
+        <p>Don't worry about memorizing these yet. This is just a preview so you have a mental map before you go deeper in the next lessons.</p>
+        <table class="spec-table">
+          <thead>
+            <tr><th>Component</th><th>What it's like</th><th>What it does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Battery</td><td>A car battery</td><td>Supplies all the power for everything</td></tr>
+            <tr><td>Main Breaker</td><td>Emergency power switch</td><td>Turns the whole robot on/off instantly</td></tr>
+            <tr><td>PDH</td><td>A fuse box</td><td>Distributes power to every component</td></tr>
+            <tr><td>roboRIO</td><td>The robot's brain</td><td>The main computer — runs the code</td></tr>
+            <tr><td>CANivore</td><td>A translator/router</td><td>Speeds up communication on CAN Bus</td></tr>
+            <tr><td>Kraken motors</td><td>Powerful electric engines</td><td>Make the robot actually move</td></tr>
+            <tr><td>Pigeon 2.0</td><td>Inner ear / compass</td><td>Tells the robot which way it's facing</td></tr>
+            <tr><td>Radio</td><td>Wi-Fi router</td><td>Connects driver station to robot wirelessly</td></tr>
+            <tr><td>Orange Pi 5</td><td>A mini PC</td><td>Handles vision processing (sees AprilTags)</td></tr>
+          </tbody>
+        </table>
+        <p>In the lessons that follow, we'll go through each of these in detail. Every new component will be explained in terms of the ones you already know — so by the time you're done, it all makes sense together.</p>
+      </div>
+
+      <!-- SECTION: How the Lessons Work -->
+      <div class="content-section">
+        <h2>How These Lessons Work</h2>
+        <p>Each lesson starts with simple ideas and adds detail as you go. At the end of each lesson there's a short quiz to check your understanding. Don't rush — take your time, re-read sections, and if something references an earlier lesson, go back and review it. That cross-referencing is intentional. It's how you build real understanding.</p>
+        <div class="tip-box">
+          <div class="label">💚 TIP FOR BEGINNERS</div>
+          <p>If you feel overwhelmed, that's normal. Every experienced electrical person started exactly where you are. Focus on the analogies first — they're designed to make the concepts "click" before the technical details do.</p>
+        </div>
+      </div>
+
+      <!-- MENTOR NOTE: Only shows in mentor mode -->
+      <div class="mentor-note">
+        <div class="label">🔧 MENTOR NOTE</div>
+        <p>For in-person sessions: Consider pairing this lesson with a physical walkthrough of the robot before students read Lesson 2. Pointing to each component while describing it dramatically improves retention. Have students physically touch (safely!) the battery, main breaker, and PDH while you describe them.</p>
+      </div>
+
+      <!-- QUIZ SECTION: Lesson 1 -->
+      <div class="quiz-section">
+        <h2>⬜ LESSON 1 QUIZ</h2>
+
+        <!-- QUIZ QUESTION 1 -->
+        <div class="quiz-q" id="l1q1">
+          <div class="q-text">1. What is the best analogy for the electrical system of a robot?</div>
+          <!-- OPTIONS: Change the text of each option. Mark the correct one with data-correct="true" -->
+          <button class="quiz-option" data-q="l1q1" data-correct="false" onclick="selectOption(this)">A) The skeleton — it holds everything together</button>
+          <button class="quiz-option" data-q="l1q1" data-correct="true" onclick="selectOption(this)">B) The nervous system — it sends signals to make things move</button>
+          <button class="quiz-option" data-q="l1q1" data-correct="false" onclick="selectOption(this)">C) The skin — it protects the robot from damage</button>
+          <button class="quiz-option" data-q="l1q1" data-correct="false" onclick="selectOption(this)">D) The wheels — it makes the robot go forward</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — The nervous system analogy best captures how signals travel from the brain (roboRIO) through wires to muscles (motors).</div>
+        </div>
+
+        <!-- QUIZ QUESTION 2 -->
+        <div class="quiz-q" id="l1q2">
+          <div class="q-text">2. What are the THREE main jobs of the electrical subteam?</div>
+          <button class="quiz-option" data-q="l1q2" data-correct="false" onclick="selectOption(this)">A) Programming, building, and designing</button>
+          <button class="quiz-option" data-q="l1q2" data-correct="true" onclick="selectOption(this)">B) Power distribution, communication, and control</button>
+          <button class="quiz-option" data-q="l1q2" data-correct="false" onclick="selectOption(this)">C) Wiring, soldering, and painting</button>
+          <button class="quiz-option" data-q="l1q2" data-correct="false" onclick="selectOption(this)">D) Driving, scouting, and pit crew</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — Power distribution (getting electricity everywhere), communication (components talking to each other), and control (driver station to robot).</div>
+        </div>
+
+        <!-- QUIZ QUESTION 3 -->
+        <div class="quiz-q" id="l1q3">
+          <div class="q-text">3. What is the FIRST safety rule when working on the robot?</div>
+          <button class="quiz-option" data-q="l1q3" data-correct="false" onclick="selectOption(this)">A) Make sure you're wearing your team shirt</button>
+          <button class="quiz-option" data-q="l1q3" data-correct="false" onclick="selectOption(this)">B) Check that the radio is connected</button>
+          <button class="quiz-option" data-q="l1q3" data-correct="true" onclick="selectOption(this)">C) Disconnect the battery before working on any electrical component</button>
+          <button class="quiz-option" data-q="l1q3" data-correct="false" onclick="selectOption(this)">D) Write your name on the wiring log</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>C — Always, always disconnect the battery first. This is non-negotiable on every FRC team.</div>
+        </div>
+
+        <!-- QUIZ SCORE DISPLAY -->
+        <div class="quiz-score" id="l1-score"></div>
+        <!-- SUBMIT BUTTON -->
+        <button class="quiz-submit" onclick="submitQuiz('l1', ['l1q1','l1q2','l1q3'], 'l1-score')">CHECK ANSWERS</button>
+      </div>
+
+      <!-- LESSON COMPLETE BUTTON -->
+      <button class="lesson-complete-btn" id="complete-l1" onclick="markComplete('l1')">✓ MARK LESSON COMPLETE</button>
+      <br/><br/>
+      <!-- NEXT LESSON NAV -->
+      <button class="hero-cta" onclick="showLesson('l2')">NEXT: LESSON 2 — POWER →</button>
+    </section><!-- END LESSON 1 -->
+
+
+    <!-- ============================================================
+         LESSON 2: Power — Battery to Everything
+         ============================================================ -->
+    <section id="page-l2" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">LESSON 02 — POWER SYSTEM</div>
+        <h1>Power — Battery to Everything</h1>
+        <p class="subtitle">How electricity travels from a single battery to every single component on the robot.</p>
+      </div>
+
+      <div class="content-section">
+        <h2>Start Simple: Power Is Like Water</h2>
+        <p>Before we talk about components, let's understand electricity the easy way.</p>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — WATER IN PIPES</div>
+          <p>Think of electricity like water flowing through pipes. The battery is the water tower — it holds pressure (voltage). The wires are pipes. Components are faucets and appliances that need water to work. More water pressure = more power available. If a pipe is too narrow (too thin a wire), it gets hot and can break. If you open too many faucets at once, pressure drops and things stop working — this is called a <strong>brownout</strong> on an FRC robot.</p>
+        </div>
+        <p>On a real FRC robot, the "water pressure" is <strong>12 volts</strong> — that's the voltage the battery provides. Everything on the robot runs off that 12V, though some devices need it stepped down to lower voltages (we'll cover that when we get to the C Buck Converter in Lesson 7).</p>
+      </div>
+
+      <div class="content-section">
+        <h2>The Battery</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The battery is the <strong>only source of power on the robot</strong>. No battery = no robot. It provides 12 volts of direct current (DC) — similar to a car battery, but specifically sized for FRC.</p>
+        <h3>The Generic FRC Battery</h3>
+        <p>Most FRC teams use a <strong>12V, 18Ah sealed lead-acid battery</strong>. The "18Ah" means it can deliver 18 amps of current for 1 hour, or 36 amps for 30 minutes, before it goes dead. In a match, a robot draws a lot of power — especially when driving and running mechanisms at the same time.</p>
+        <h3>The Energizer FRC Battery</h3>
+        <p>Some teams, including ours, use the <strong>Energizer EV12FR</strong> (or similar Energizer FRC-spec battery). This battery is specifically designed for high-current discharge, meaning it holds up better during intense match play. It has lower internal resistance, so it delivers more stable voltage even under heavy load — reducing brownouts. Think of it as a "premium water tower" that maintains pressure even when all the faucets are open.</p>
+
+        <!-- IMAGE PLACEHOLDER: Battery photo -->
+        <!-- IMAGE PLACEHOLDER: Replace 'battery.jpg' with your image filename. Place the image in the /images folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🔋</div>
+          <div>PLACEHOLDER IMAGE</div>
+          <div class="ph-label">Replace with: images/battery.jpg — Photo of FRC battery (generic + Energizer)</div>
+        </div>
+
+        <div class="warn-box">
+          <div class="label">⚠️ COMMON MISTAKE</div>
+          <p>Never leave a battery sitting on a cold concrete floor — it discharges faster. Always store batteries on a rubber mat or shelf. Also, never use a battery that has a dented case or shows signs of swelling. Tell a mentor immediately if you find one like this.</p>
+        </div>
+
+        <table class="spec-table">
+          <tr><th>Spec</th><th>Generic FRC Battery</th><th>Energizer FRC Battery</th></tr>
+          <tr><td>Voltage</td><td>12V</td><td>12V</td></tr>
+          <tr><td>Capacity</td><td>~18Ah</td><td>~18Ah</td></tr>
+          <tr><td>Type</td><td>Sealed Lead-Acid (SLA)</td><td>Sealed Lead-Acid (SLA)</td></tr>
+          <tr><td>Best For</td><td>Practice/backup</td><td>Competition matches</td></tr>
+        </table>
+      </div>
+
+      <div class="content-section">
+        <h2>The Main Breaker</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The main breaker is a <strong>large red switch</strong> at the top of the robot. It is the master on/off switch for ALL electrical power on the robot. When you flip it off, every component instantly loses power.</p>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY</div>
+          <p>The main breaker is like the main circuit breaker panel in a house. There's one big switch at the top that controls everything. If you flip that one switch, every light, outlet, and appliance in the house goes dead. On the robot, the main breaker does the same thing — one switch kills all power instantly.</p>
+        </div>
+        <p>The main breaker also serves as a <strong>120A (amp) overcurrent protector</strong>. If something catastrophically wrong happens and too much current flows through the system, it trips (pops) to prevent fires and damage. Think of it as a safety valve.</p>
+        <div class="tip-box">
+          <div class="label">💚 RULE</div>
+          <p>In FRC competition, the main breaker must be accessible from outside the robot. Inspectors will check this. The robot must be able to be shut off immediately by hitting the main breaker — this is a safety requirement.</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>The Power Distribution Hub (PDH)</h2>
+        <span class="tag tag-blue">WE USE THIS — IN DEPTH IN COMPONENT LIBRARY</span>
+        <div class="back-ref" onclick="showPage('components')">See full PDH deep-dive in the Components section →</div>
+        <p>After the main breaker, power goes straight to the <strong>PDH — Power Distribution Hub</strong>. The PDH is like the fuse box in a house. Where a house's fuse box has individual circuit breakers for each room, the PDH has individual fuse-protected channels for each component on the robot.</p>
+        <p>The PDH has <strong>20 high-current channels</strong> (for motors) and <strong>4 low-current channels</strong> (for sensors and small devices). Each channel is individually fused so that if one component short-circuits, it doesn't take down the whole robot.</p>
+
+        <!-- IMAGE PLACEHOLDER: PDH image -->
+        <!-- IMAGE PLACEHOLDER: Replace 'pdh.jpg' with your image filename. Place image in /images folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🔌</div>
+          <div>PLACEHOLDER IMAGE</div>
+          <div class="ph-label">Replace with: images/pdh.jpg — Photo of CTRE Power Distribution Hub</div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>The Full Power Flow</h2>
+        <p>Here's the complete path that electricity takes from the battery to every component:</p>
+        <div class="power-flow">
+          <div class="node">🔋 BATTERY (12V)</div>
+          <div class="arrow">   ↓ thick red/black wire (main power cable)</div>
+          <div class="node">🔴 MAIN BREAKER (120A)</div>
+          <div class="arrow">   ↓ thick wire</div>
+          <div class="node">⚡ PDH — Power Distribution Hub</div>
+          <div class="arrow">   ↓ (multiple channels fan out from here)</div>
+          <div class="node">🤖 MOTORS (via high-current channels, 40A fuses)</div>
+          <div class="node">🧠 roboRIO (via dedicated channel)</div>
+          <div class="node">📡 RADIO (via Mini Power Module)</div>
+          <div class="node">🔊 ALL OTHER COMPONENTS...</div>
+        </div>
+        <div class="tip-box">
+          <div class="label">💚 KEY INSIGHT</div>
+          <p>Every single component on the robot gets its power from the PDH, directly or indirectly. The PDH is the hub of all power — that's why its failure is catastrophic. Always make sure PDH connections are tight and fuses are correct before powering on.</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>Brownouts — When Too Much Power Is Drawn</h2>
+        <p>A <strong>brownout</strong> happens when the robot draws more current than the battery can cleanly supply. The voltage drops below 6.8V and the roboRIO (the brain — we'll meet it properly in Lesson 3) shuts down non-essential outputs to protect itself. This causes the robot to momentarily go limp or behave strangely.</p>
+        <div class="warn-box">
+          <div class="label">⚠️ WATCH OUT</div>
+          <p>Brownouts most commonly happen when all four drive motors try to accelerate hard at the same time, while the battery is already partially drained. Good programming can help by ramping motor speeds gradually. On the electrical side, using quality batteries and keeping connections clean reduces brownout risk.</p>
+        </div>
+      </div>
+
+      <!-- MENTOR NOTE -->
+      <div class="mentor-note">
+        <div class="label">🔧 MENTOR NOTE</div>
+        <p>Advanced note: The PDH connects to the roboRIO via CAN Bus for power monitoring. This allows the code to read per-channel current draw in real time — useful for detecting stalls (a motor trying to spin but being physically blocked). Cover this connection in Lesson 4 on CAN Bus.</p>
+      </div>
+
+      <!-- QUIZ: Lesson 2 -->
+      <div class="quiz-section">
+        <h2>⬜ LESSON 2 QUIZ</h2>
+        <div class="quiz-q" id="l2q1">
+          <div class="q-text">1. In the water analogy, what does "voltage" correspond to?</div>
+          <button class="quiz-option" data-q="l2q1" data-correct="false" onclick="selectOption(this)">A) The size of the pipes</button>
+          <button class="quiz-option" data-q="l2q1" data-correct="true" onclick="selectOption(this)">B) The water pressure</button>
+          <button class="quiz-option" data-q="l2q1" data-correct="false" onclick="selectOption(this)">C) How much water is in the tank</button>
+          <button class="quiz-option" data-q="l2q1" data-correct="false" onclick="selectOption(this)">D) The speed the water moves</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — Voltage is pressure. Current (amps) is flow rate. Together they determine power (watts).</div>
+        </div>
+        <div class="quiz-q" id="l2q2">
+          <div class="q-text">2. What does the Main Breaker do?</div>
+          <button class="quiz-option" data-q="l2q2" data-correct="false" onclick="selectOption(this)">A) Converts 12V to 5V for sensors</button>
+          <button class="quiz-option" data-q="l2q2" data-correct="true" onclick="selectOption(this)">B) Acts as the master on/off switch and a 120A overcurrent protector</button>
+          <button class="quiz-option" data-q="l2q2" data-correct="false" onclick="selectOption(this)">C) Distributes power to each individual motor</button>
+          <button class="quiz-option" data-q="l2q2" data-correct="false" onclick="selectOption(this)">D) Wirelessly connects the robot to the driver station</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — It's both the emergency shutoff and the first line of overcurrent protection at 120A.</div>
+        </div>
+        <div class="quiz-q" id="l2q3">
+          <div class="q-text">3. What is a brownout?</div>
+          <button class="quiz-option" data-q="l2q3" data-correct="false" onclick="selectOption(this)">A) When the robot's code crashes</button>
+          <button class="quiz-option" data-q="l2q3" data-correct="false" onclick="selectOption(this)">B) When the main breaker trips</button>
+          <button class="quiz-option" data-q="l2q3" data-correct="true" onclick="selectOption(this)">C) When voltage drops too low and the roboRIO protects itself by cutting outputs</button>
+          <button class="quiz-option" data-q="l2q3" data-correct="false" onclick="selectOption(this)">D) When the radio loses connection</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>C — Brownout protection kicks in below 6.8V. The robot "goes limp" momentarily to protect the computer.</div>
+        </div>
+        <div class="quiz-score" id="l2-score"></div>
+        <button class="quiz-submit" onclick="submitQuiz('l2', ['l2q1','l2q2','l2q3'], 'l2-score')">CHECK ANSWERS</button>
+      </div>
+
+      <button class="lesson-complete-btn" id="complete-l2" onclick="markComplete('l2')">✓ MARK LESSON COMPLETE</button>
+      <br/><br/>
+      <button class="hero-cta" onclick="showLesson('l3')">NEXT: LESSON 3 — THE BRAIN →</button>
+    </section><!-- END LESSON 2 -->
+
+
+    <!-- ============================================================
+         LESSON 3: The Brain — roboRIO 2.0
+         ============================================================ -->
+    <section id="page-l3" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">LESSON 03 — THE BRAIN</div>
+        <h1>The roboRIO 2.0</h1>
+        <p class="subtitle">The robot's main computer — everything else exists to serve it or be controlled by it.</p>
+      </div>
+
+      <div class="content-section">
+        <div class="back-ref" onclick="showLesson('l2')">Reminder from Lesson 2: The roboRIO gets its power from the PDH — the fuse box we learned about. →</div>
+
+        <h2>What Is the roboRIO?</h2>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — THE BRAIN</div>
+          <p>The roboRIO is the brain of the robot. Just like your brain receives signals from your senses and sends commands to your muscles, the roboRIO receives sensor data and driver commands, runs the robot's code, and sends control signals to the motors and other actuators. Without a brain, your body can't do anything. Without the roboRIO, the robot is just metal and motors that do nothing.</p>
+        </div>
+        <p>The <strong>roboRIO 2.0</strong> is manufactured by National Instruments (NI) and is the <strong>only approved robot controller</strong> for FRC competition. You cannot use any other computer as the primary controller — this is a rule.</p>
+        <p>It runs a real-time operating system and executes the robot code that your programming subteam writes (usually in Java, C++, or Python). Every decision the robot makes — turn left, fire a shooter, raise an arm — comes from code running on the roboRIO.</p>
+      </div>
+
+      <div class="content-section">
+        <h2>What Does the roboRIO Connect To?</h2>
+        <p>The roboRIO is a hub for communication. Here's what connects to it:</p>
+        <table class="spec-table">
+          <tr><th>Connection</th><th>Purpose</th><th>Type</th></tr>
+          <tr><td>PDH</td><td>Receives power (from PDH's dedicated output)</td><td>Power (6V regulated)</td></tr>
+          <tr><td>CAN Bus</td><td>Communicates with motors, PDH, sensors, CANivore</td><td>CAN (2-wire data)</td></tr>
+          <tr><td>Ethernet Port</td><td>Connects to the Radio (receives commands from driver)</td><td>Ethernet</td></tr>
+          <tr><td>USB Ports</td><td>Connect cameras, USB hub, diagnostic devices</td><td>USB</td></tr>
+          <tr><td>RSL Port</td><td>Controls the Robot Signal Light</td><td>Digital Output</td></tr>
+          <tr><td>DIO / AIO Ports</td><td>Limit switches, analog sensors, encoders</td><td>Digital/Analog</td></tr>
+        </table>
+
+        <!-- IMAGE PLACEHOLDER: roboRIO 2.0 image -->
+        <!-- IMAGE PLACEHOLDER: Replace 'roborio.jpg' with your image filename. Place image in /images folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🧠</div>
+          <div>PLACEHOLDER IMAGE</div>
+          <div class="ph-label">Replace with: images/roborio.jpg — Photo of roboRIO 2.0 with labels</div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>roboRIO 1.0 vs 2.0</h2>
+        <p>The roboRIO 2.0 was released in 2022. If you ever see an older roboRIO, you can tell the difference: the 2.0 has a USB-C port and 3x more memory. The 2.0 loads code much faster and is more reliable at high-speed CAN communication — which matters when you have many motors on CAN Bus (we'll cover CAN Bus in Lesson 4).</p>
+        <div class="tip-box">
+          <div class="label">💚 ALWAYS USE THE 2.0</div>
+          <p>If your team has both versions, always use the 2.0 for competition robots. The 1.0 is fine for practice bots but can struggle with heavy CAN loads.</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>The Robot Signal Light (RSL)</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>Connected directly to the roboRIO is the <strong>RSL — Robot Signal Light</strong>. This is the orange blinking/solid light you see on competition robots. It communicates the robot's status:</p>
+        <table class="spec-table">
+          <tr><th>RSL Pattern</th><th>What It Means</th></tr>
+          <tr><td>Solid orange</td><td>Robot is powered and connected, but not enabled</td></tr>
+          <tr><td>Blinking orange (slow)</td><td>Robot is enabled and under operator control</td></tr>
+          <tr><td>Blinking orange (fast)</td><td>Robot is in autonomous mode</td></tr>
+          <tr><td>Off</td><td>Robot is not powered</td></tr>
+        </table>
+        <div class="warn-box">
+          <div class="label">⚠️ SAFETY RULE</div>
+          <p>The RSL is an <strong>FRC safety requirement</strong>. A robot without a working RSL will not pass inspection. Make sure it is mounted visibly on the outside of the robot and wired correctly. If the RSL is not working, check that it's connected to the RSL port on the roboRIO and that the roboRIO has power.</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>The System Core</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The <strong>System Core</strong> (by Cross The Road Electronics / CTRE) is a newer component that works alongside the roboRIO. Think of it as a <strong>co-processor</strong> — a second, smaller brain that handles specific high-speed tasks so the roboRIO doesn't get overwhelmed.</p>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY</div>
+          <p>Imagine the roboRIO is the principal of a school. The System Core is the vice principal who handles all the day-to-day paperwork so the principal can focus on the big decisions. Together, they're more efficient than the principal trying to do everything alone.</p>
+        </div>
+        <p>The System Core connects to the roboRIO via CAN Bus (which we'll learn in Lesson 4) and handles high-frequency motor control data. It lets the robot run more motors at higher speeds with less latency.</p>
+      </div>
+
+      <!-- MENTOR NOTE -->
+      <div class="mentor-note">
+        <div class="label">🔧 MENTOR NOTE</div>
+        <p>Advanced: The roboRIO runs NI's real-time OS (Linux-based). The robot code runs in user space with WPILib handling hardware abstraction. For teams using Phoenix 6 (CTRE's framework), the CANivore (covered in Lesson 4) offloads CAN Bus management entirely, reducing roboRIO CPU load significantly.</p>
+      </div>
+
+      <!-- QUIZ: Lesson 3 -->
+      <div class="quiz-section">
+        <h2>⬜ LESSON 3 QUIZ</h2>
+        <div class="quiz-q" id="l3q1">
+          <div class="q-text">1. What is the roboRIO often called?</div>
+          <button class="quiz-option" data-q="l3q1" data-correct="false" onclick="selectOption(this)">A) The heart of the robot</button>
+          <button class="quiz-option" data-q="l3q1" data-correct="true" onclick="selectOption(this)">B) The brain of the robot</button>
+          <button class="quiz-option" data-q="l3q1" data-correct="false" onclick="selectOption(this)">C) The fuse box of the robot</button>
+          <button class="quiz-option" data-q="l3q1" data-correct="false" onclick="selectOption(this)">D) The Wi-Fi router of the robot</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — The brain. It receives inputs, runs code, and sends output commands.</div>
+        </div>
+        <div class="quiz-q" id="l3q2">
+          <div class="q-text">2. What does a SLOW blinking RSL mean?</div>
+          <button class="quiz-option" data-q="l3q2" data-correct="false" onclick="selectOption(this)">A) The robot is broken</button>
+          <button class="quiz-option" data-q="l3q2" data-correct="false" onclick="selectOption(this)">B) The robot is in autonomous mode</button>
+          <button class="quiz-option" data-q="l3q2" data-correct="true" onclick="selectOption(this)">C) The robot is enabled in operator (teleop) control</button>
+          <button class="quiz-option" data-q="l3q2" data-correct="false" onclick="selectOption(this)">D) The battery is low</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>C — Slow blink = teleop enabled. Fast blink = autonomous. Solid = powered but disabled.</div>
+        </div>
+        <div class="quiz-q" id="l3q3">
+          <div class="q-text">3. How does the roboRIO receive commands from the driver?</div>
+          <button class="quiz-option" data-q="l3q3" data-correct="false" onclick="selectOption(this)">A) Through the CAN Bus directly from a joystick</button>
+          <button class="quiz-option" data-q="l3q3" data-correct="true" onclick="selectOption(this)">B) Through the Radio via Ethernet</button>
+          <button class="quiz-option" data-q="l3q3" data-correct="false" onclick="selectOption(this)">C) Through a USB cable from the driver laptop</button>
+          <button class="quiz-option" data-q="l3q3" data-correct="false" onclick="selectOption(this)">D) Through the battery directly</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — The Radio wirelessly receives data from the driver station and passes it to the roboRIO via Ethernet. We cover this fully in Lesson 7.</div>
+        </div>
+        <div class="quiz-score" id="l3-score"></div>
+        <button class="quiz-submit" onclick="submitQuiz('l3', ['l3q1','l3q2','l3q3'], 'l3-score')">CHECK ANSWERS</button>
+      </div>
+
+      <button class="lesson-complete-btn" id="complete-l3" onclick="markComplete('l3')">✓ MARK LESSON COMPLETE</button>
+      <br/><br/>
+      <button class="hero-cta" onclick="showLesson('l4')">NEXT: LESSON 4 — CAN BUS →</button>
+    </section><!-- END LESSON 3 -->
+
+
+    <!-- ============================================================
+         LESSON 4: CAN Bus
+         ============================================================ -->
+    <section id="page-l4" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">LESSON 04 — COMMUNICATION</div>
+        <h1>CAN Bus — The Nervous System</h1>
+        <p class="subtitle">How every component on the robot talks to the brain.</p>
+      </div>
+
+      <div class="content-section">
+        <div class="back-ref" onclick="showLesson('l3')">Remember from Lesson 3: The roboRIO is the brain. CAN Bus is how it talks to everything else. →</div>
+
+        <h2>What Is CAN Bus?</h2>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — THE INTERCOM SYSTEM</div>
+          <p>Imagine a large office building with one intercom system that connects every room. Instead of calling each room one-by-one on separate phone lines, the boss (roboRIO) broadcasts on the shared intercom. Every room (motor controller, sensor) hears the broadcast, but only the ones whose number is called respond. This shared wire network is CAN Bus. It's one wire loop that all devices share, and each device has a unique "address" (called a CAN ID) so messages get to the right place.</p>
+        </div>
+        <p><strong>CAN stands for Controller Area Network.</strong> It was originally designed for cars — every modern vehicle uses CAN Bus so the engine computer can talk to the transmission, the brakes, the dashboard, and sensors, all on just two wires. FRC robots use the same technology.</p>
+        <p>The two CAN wires are usually <strong>yellow (CAN High)</strong> and <strong>green (CAN Low)</strong>. They form a loop (a daisy chain or ring) connecting all CAN devices together. At each end of the chain, there are 120Ω termination resistors to prevent signal reflections (the PDH and the last device typically handle this).</p>
+      </div>
+
+      <div class="content-section">
+        <h2>What Devices Are on CAN Bus?</h2>
+        <p>On our robot, the following devices communicate over CAN Bus:</p>
+        <ul>
+          <li><strong>roboRIO</strong> — the bus master / brain</li>
+          <li><strong>PDH</strong> — power monitor, receives enable/disable commands</li>
+          <li><strong>CANivore</strong> — a CAN Bus booster/router (covered below)</li>
+          <li><strong>Kraken X44 / X60 motors</strong> — their built-in controllers communicate over CAN</li>
+          <li><strong>Pigeon 2.0</strong> — IMU/gyro, sends orientation data over CAN</li>
+          <li><strong>CAN Range</strong> — distance sensor on CAN</li>
+          <li><strong>CANANDCOLOR</strong> — color/proximity sensor on CAN</li>
+        </ul>
+        <div class="tip-box">
+          <div class="label">💚 CAN IDs</div>
+          <p>Every CAN device needs a unique ID number (0–62). If two devices share the same ID, they'll conflict and both will malfunction. IDs are set using configuration software (Phoenix Tuner X for CTRE devices, REV Hardware Client for REV devices). Always verify IDs before competition.</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>The CANivore</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <div class="back-ref" onclick="showLesson('l3')">Remember from Lesson 3: The roboRIO (the brain) connects to the CANivore, which then manages a separate CAN Bus network. →</div>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — A DEDICATED EXPRESSWAY</div>
+          <p>Imagine traffic on a highway. Without the CANivore, all CAN Bus traffic has to go through the roboRIO's one lane — it gets congested with many fast cars (motors). The CANivore is like building a separate, faster expressway. It handles all the high-speed motor data on its own, letting the roboRIO's regular road stay clear for less urgent tasks.</p>
+        </div>
+        <p>The CANivore connects to the roboRIO via <strong>USB</strong> and creates a separate, isolated CAN Bus network running at <strong>1 Mbit/s</strong> (vs the standard 1 Mbit/s shared bus). All CTRE devices (Kraken motors, Pigeon 2.0, etc.) can connect to the CANivore's bus.</p>
+        <p>Benefits of the CANivore:</p>
+        <ul>
+          <li>Lower latency for motor control (critical for swerve drive)</li>
+          <li>Reduces roboRIO CPU load</li>
+          <li>Separates high-speed motor traffic from other CAN devices</li>
+          <li>Better diagnostics — you can see per-device status in Phoenix Tuner X</li>
+        </ul>
+
+        <!-- IMAGE PLACEHOLDER: CANivore -->
+        <!-- IMAGE PLACEHOLDER: Replace 'canivore.jpg' with your image filename. Place image in /images folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🔗</div>
+          <div>PLACEHOLDER IMAGE</div>
+          <div class="ph-label">Replace with: images/canivore.jpg — Photo of CTRE CANivore with CAN wires labeled</div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>The Mini Power Module</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The <strong>Mini Power Module (MPM)</strong> is a small CTRE device that provides <strong>clean, regulated 12V power to the CANivore and other small devices</strong>. It plugs into one of the PDH's 20A channels and outputs stable power.</p>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY</div>
+          <p>Think of the Mini Power Module as a clean, dedicated wall outlet in a nice surge-protected power strip. Even when the main power in the house (PDH) is fluctuating from all the motors running, the MPM provides clean, stable power to the sensitive electronics connected to it.</p>
+        </div>
+        <p>The MPM also connects to CAN Bus so it can be monitored and it provides power to devices like the CANivore, which then manages the CAN Bus for the motors. In Lesson 7, we'll also see that the C Buck Converter draws from the MPM to power the Orange Pi 5.</p>
+      </div>
+
+      <div class="content-section">
+        <h2>Troubleshooting CAN Bus</h2>
+        <p>CAN Bus problems are common and can be tricky for beginners. Here's what to look for:</p>
+        <table class="spec-table">
+          <tr><th>Problem</th><th>Likely Cause</th><th>Fix</th></tr>
+          <tr><td>Device not showing in Phoenix Tuner</td><td>Wrong CAN ID, bad connection, or device not powered</td><td>Check power to device, check wire terminations, reseat wires</td></tr>
+          <tr><td>High CAN Bus utilization (&gt;90%)</td><td>Too many devices, too fast update rates</td><td>Use CANivore, reduce status frame rates in code</td></tr>
+          <tr><td>Intermittent faults</td><td>Loose CAN wire crimps or broken wire</td><td>Inspect all CAN connections, wiggle test wires</td></tr>
+          <tr><td>Duplicate CAN ID error</td><td>Two devices with same ID</td><td>Use Phoenix Tuner X to identify and renumber</td></tr>
+        </table>
+      </div>
+
+      <!-- MENTOR NOTE -->
+      <div class="mentor-note">
+        <div class="label">🔧 MENTOR NOTE</div>
+        <p>The roboRIO's internal CAN Bus runs at 1 Mbit/s but with higher latency due to OS overhead. The CANivore bypasses this using a dedicated USB-CAN bridge with Phoenix's pro library, achieving 250Hz+ control loops for swerve. For teams using Phoenix 6 Pro, the CANivore is nearly mandatory for competitive swerve performance.</p>
+      </div>
+
+      <!-- QUIZ: Lesson 4 -->
+      <div class="quiz-section">
+        <h2>⬜ LESSON 4 QUIZ</h2>
+        <div class="quiz-q" id="l4q1">
+          <div class="q-text">1. What are the two wire colors typically used for CAN Bus?</div>
+          <button class="quiz-option" data-q="l4q1" data-correct="false" onclick="selectOption(this)">A) Red and black</button>
+          <button class="quiz-option" data-q="l4q1" data-correct="true" onclick="selectOption(this)">B) Yellow (CAN High) and Green (CAN Low)</button>
+          <button class="quiz-option" data-q="l4q1" data-correct="false" onclick="selectOption(this)">C) Blue and white</button>
+          <button class="quiz-option" data-q="l4q1" data-correct="false" onclick="selectOption(this)">D) Orange and purple</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — Standard CTRE/WPILib CAN wiring: yellow = CANH, green = CANL.</div>
+        </div>
+        <div class="quiz-q" id="l4q2">
+          <div class="q-text">2. What does the CANivore do?</div>
+          <button class="quiz-option" data-q="l4q2" data-correct="false" onclick="selectOption(this)">A) It provides 5V power to sensors</button>
+          <button class="quiz-option" data-q="l4q2" data-correct="true" onclick="selectOption(this)">B) It creates a separate, faster CAN Bus network to reduce roboRIO load</button>
+          <button class="quiz-option" data-q="l4q2" data-correct="false" onclick="selectOption(this)">C) It is a type of motor controller</button>
+          <button class="quiz-option" data-q="l4q2" data-correct="false" onclick="selectOption(this)">D) It connects to the radio via Wi-Fi</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — The CANivore is a USB-to-CAN bridge that offloads bus management from the roboRIO.</div>
+        </div>
+        <div class="quiz-q" id="l4q3">
+          <div class="q-text">3. What happens if two devices have the same CAN ID?</div>
+          <button class="quiz-option" data-q="l4q3" data-correct="false" onclick="selectOption(this)">A) They share the workload efficiently</button>
+          <button class="quiz-option" data-q="l4q3" data-correct="false" onclick="selectOption(this)">B) One shuts off automatically</button>
+          <button class="quiz-option" data-q="l4q3" data-correct="true" onclick="selectOption(this)">C) They conflict and both malfunction</button>
+          <button class="quiz-option" data-q="l4q3" data-correct="false" onclick="selectOption(this)">D) The roboRIO picks the stronger signal</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>C — Duplicate CAN IDs cause bus collisions. Both devices try to respond at the same time, corrupting messages. Always assign unique IDs.</div>
+        </div>
+        <div class="quiz-score" id="l4-score"></div>
+        <button class="quiz-submit" onclick="submitQuiz('l4', ['l4q1','l4q2','l4q3'], 'l4-score')">CHECK ANSWERS</button>
+      </div>
+
+      <button class="lesson-complete-btn" id="complete-l4" onclick="markComplete('l4')">✓ MARK LESSON COMPLETE</button>
+      <br/><br/>
+      <button class="hero-cta" onclick="showLesson('l5')">NEXT: LESSON 5 — MOTORS →</button>
+    </section><!-- END LESSON 4 -->
+
+
+    <!-- ============================================================
+         LESSON 5: Motors & Movement
+         ============================================================ -->
+    <section id="page-l5" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">LESSON 05 — MOTORS</div>
+        <h1>Motors &amp; Movement</h1>
+        <p class="subtitle">Kraken motors, MK5i swerve modules, and how robots actually drive.</p>
+      </div>
+
+      <div class="content-section">
+        <div class="back-ref" onclick="showLesson('l4')">Remember from Lesson 4: Kraken motors communicate over CAN Bus, managed by the CANivore. →</div>
+
+        <h2>How Motors Work (The Simple Version)</h2>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — ELECTRIC MOTORS</div>
+          <p>A motor is like a hand pushing a wheel. Plug it in, electricity flows through magnets inside, and the shaft spins. The faster you send electricity, the faster it spins. The harder the shaft is loaded (like trying to push through mud), the more current it draws — just like how you breathe harder when carrying heavy things. A motor controller (built into the Kraken) is the "throttle" that controls how much electricity flows to the motor.</p>
+        </div>
+        <p>FRC motors need a <strong>motor controller</strong> to operate. The motor controller takes a command from the roboRIO (via CAN Bus) and converts it into the right amount of power from the PDH to make the motor spin at the desired speed and direction.</p>
+      </div>
+
+      <div class="content-section">
+        <h2>Kraken X60 Motor</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The <strong>Kraken X60</strong> is a high-performance brushless motor by CTRE (Cross The Road Electronics) with a built-in motor controller (called TalonFX) integrated directly into the motor body. This means <strong>no separate motor controller box</strong> — the smart controller is inside the motor itself.</p>
+
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — ALL-IN-ONE</div>
+          <p>Older FRC motors (like the CIM or Falcon 500) needed a separate controller box wired to them — like a TV needing a separate cable box. The Kraken X60 is like a modern smart TV — the "cable box" is built right in. Less wiring, less weight, more reliable.</p>
+        </div>
+
+        <p>The Kraken X60 connects to the robot via:</p>
+        <ul>
+          <li><strong>Power wires (red/black)</strong> — connect to a 40A channel on the PDH</li>
+          <li><strong>CAN wires (yellow/green)</strong> — connect to the CANivore CAN Bus for control</li>
+        </ul>
+
+        <table class="spec-table">
+          <tr><th>Spec</th><th>Value</th></tr>
+          <tr><td>Peak Power</td><td>~1000W (insane for a 1.2lb motor)</td></tr>
+          <tr><td>Free Speed</td><td>~6000 RPM</td></tr>
+          <tr><td>Stall Torque</td><td>~9.4 N·m</td></tr>
+          <tr><td>Weight</td><td>~1.2 lbs</td></tr>
+          <tr><td>Communication</td><td>CAN Bus (TalonFX inside)</td></tr>
+          <tr><td>Encoder</td><td>Built-in 2048 CPR absolute encoder</td></tr>
+        </table>
+
+        <!-- IMAGE PLACEHOLDER: Kraken X60 -->
+        <!-- IMAGE PLACEHOLDER: Replace 'kraken-x60.jpg' with your actual image. Place image in /images folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">⚙️</div>
+          <div>PLACEHOLDER IMAGE</div>
+          <div class="ph-label">Replace with: images/kraken-x60.jpg — Photo of Kraken X60 motor with wires labeled</div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>Kraken X44 Motor</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The <strong>Kraken X44</strong> is a smaller, lighter version of the Kraken X60. It uses the same TalonFX controller and CAN Bus interface, but in a more compact package. It's used for mechanisms where space or weight is at a premium — like steering modules inside swerve pods where clearance is tight.</p>
+        <p>The wiring is identical to the X60 — power from PDH, CAN Bus to CANivore. The main differences are size, weight, and peak power output (slightly lower than the X60).</p>
+        <div class="tip-box">
+          <div class="label">💚 X44 vs X60 — HOW TO CHOOSE</div>
+          <p>X60 for drive wheels (high power needed). X44 for steering (precision needed, less power). Both use the same code API since they're both TalonFX devices.</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>MK5i Swerve Modules</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The <strong>MK5i</strong> is a swerve drive module made by Swerve Drive Specialties (SDS). Each swerve module is a complete wheel-and-steering assembly that can rotate the wheel 360° while also driving it. Four of these modules go in the corners of the robot to create a swerve drivetrain.</p>
+
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — SHOPPING CART WHEELS</div>
+          <p>Imagine if all four wheels on a shopping cart could be pointed and driven in any direction at the same time, independently. That's swerve drive. A regular tank drive robot turns like a tank — pivot in place or arc. A swerve robot can move sideways, diagonally, spin while driving — all without changing direction of the robot body. It's the most maneuverable drivetrain in FRC.</p>
+        </div>
+
+        <p>Each MK5i module contains:</p>
+        <ul>
+          <li>One <strong>Kraken X60</strong> (drive motor) — spins the wheel to go forward/backward</li>
+          <li>One <strong>Kraken X44</strong> (steer motor) — rotates the wheel to change direction</li>
+          <li>A <strong>CANCoder</strong> (absolute encoder) — tells the code exactly which angle the wheel is pointing</li>
+        </ul>
+        <p>With 4 modules, that's <strong>8 Kraken motors + 4 CANCoders</strong> on CAN Bus for the drive train alone. This is why the CANivore and its dedicated high-speed bus are so important for swerve.</p>
+
+        <!-- IMAGE PLACEHOLDER: MK5i Swerve Module -->
+        <!-- IMAGE PLACEHOLDER: Replace 'mk5i.jpg' with your image. Place in /images folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🔄</div>
+          <div>PLACEHOLDER IMAGE</div>
+          <div class="ph-label">Replace with: images/mk5i.jpg — Photo or diagram of MK5i swerve module with parts labeled</div>
+        </div>
+
+        <div class="warn-box">
+          <div class="label">⚠️ COMMON MISTAKE — SWERVE WHEEL ALIGNMENT</div>
+          <p>Before every match, or after any collision, verify that all four swerve wheels are pointing forward. Misaligned wheels at startup cause the robot to drive unpredictably. The absolute CANCoder encoders should read the correct zero positions — check these in Phoenix Tuner X.</p>
+        </div>
+      </div>
+
+      <!-- MENTOR NOTE -->
+      <div class="mentor-note">
+        <div class="label">🔧 MENTOR NOTE</div>
+        <p>The MK5i uses a 1:1 bevel gear and two-stage planetary reduction. Drive gear ratio options are L1, L2, L3, L4 — your team has chosen [EDIT: fill in your gear ratio]. Higher ratios = more speed, less torque. For Krakens, L3 or L4 with Kraken X60 is a common competition setup. Make sure students understand that the gear ratio affects both the free speed calculation and the physics simulation parameters in code.</p>
+      </div>
+
+      <!-- QUIZ: Lesson 5 -->
+      <div class="quiz-section">
+        <h2>⬜ LESSON 5 QUIZ</h2>
+        <div class="quiz-q" id="l5q1">
+          <div class="q-text">1. What makes the Kraken X60 different from older FRC motors like the CIM?</div>
+          <button class="quiz-option" data-q="l5q1" data-correct="false" onclick="selectOption(this)">A) It runs on 24V instead of 12V</button>
+          <button class="quiz-option" data-q="l5q1" data-correct="true" onclick="selectOption(this)">B) It has a built-in motor controller (TalonFX) — no separate controller box needed</button>
+          <button class="quiz-option" data-q="l5q1" data-correct="false" onclick="selectOption(this)">C) It is a brushed DC motor</button>
+          <button class="quiz-option" data-q="l5q1" data-correct="false" onclick="selectOption(this)">D) It connects via PWM instead of CAN Bus</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — The Kraken integrates the TalonFX controller into the motor body. CIM motors need a separate Talon SRX or Victor SPX.</div>
+        </div>
+        <div class="quiz-q" id="l5q2">
+          <div class="q-text">2. How many Kraken motors does a full swerve drive with 4 MK5i modules use?</div>
+          <button class="quiz-option" data-q="l5q2" data-correct="false" onclick="selectOption(this)">A) 4</button>
+          <button class="quiz-option" data-q="l5q2" data-correct="true" onclick="selectOption(this)">B) 8</button>
+          <button class="quiz-option" data-q="l5q2" data-correct="false" onclick="selectOption(this)">C) 6</button>
+          <button class="quiz-option" data-q="l5q2" data-correct="false" onclick="selectOption(this)">D) 2</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — 2 motors per module (1 drive + 1 steer) × 4 modules = 8 motors total for the drivetrain.</div>
+        </div>
+        <div class="quiz-q" id="l5q3">
+          <div class="q-text">3. What is the advantage of swerve drive over a regular tank drive?</div>
+          <button class="quiz-option" data-q="l5q3" data-correct="false" onclick="selectOption(this)">A) It uses fewer motors</button>
+          <button class="quiz-option" data-q="l5q3" data-correct="false" onclick="selectOption(this)">B) It is simpler to wire</button>
+          <button class="quiz-option" data-q="l5q3" data-correct="true" onclick="selectOption(this)">C) The robot can move in any direction without turning the robot body</button>
+          <button class="quiz-option" data-q="l5q3" data-correct="false" onclick="selectOption(this)">D) It doesn't require encoders</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>C — Holonomic (omnidirectional) movement. The robot can translate sideways while rotating, which is extremely powerful for game strategy.</div>
+        </div>
+        <div class="quiz-score" id="l5-score"></div>
+        <button class="quiz-submit" onclick="submitQuiz('l5', ['l5q1','l5q2','l5q3'], 'l5-score')">CHECK ANSWERS</button>
+      </div>
+
+      <button class="lesson-complete-btn" id="complete-l5" onclick="markComplete('l5')">✓ MARK LESSON COMPLETE</button>
+      <br/><br/>
+      <button class="hero-cta" onclick="showLesson('l6')">NEXT: LESSON 6 — SENSORS →</button>
+    </section><!-- END LESSON 5 -->
+
+
+    <!-- ============================================================
+         LESSON 6: Sensors & Feedback
+         ============================================================ -->
+    <section id="page-l6" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">LESSON 06 — SENSORS</div>
+        <h1>Sensors &amp; Feedback</h1>
+        <p class="subtitle">How the robot senses the world — Pigeon 2.0, CAN Range, CANANDCOLOR, and more.</p>
+      </div>
+
+      <div class="content-section">
+        <div class="back-ref" onclick="showLesson('l4')">Remember from Lesson 4: Sensors communicate over CAN Bus, sending data back to the roboRIO (the brain) in real time. →</div>
+
+        <h2>Why Do Robots Need Sensors?</h2>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — YOUR BODY'S SENSES</div>
+          <p>Close your eyes and try to walk in a straight line. You'll drift. Now close your eyes and try to pick up an object without knowing where it is. Without your senses, your brain can't make accurate decisions. The robot is the same. Without sensors, the code is "flying blind" — it doesn't know if the robot is tilting, where it's facing, how far away a target is, or whether a mechanism is in the right position.</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>Pigeon 2.0 (IMU/Gyro)</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The <strong>Pigeon 2.0</strong> is an IMU — <strong>Inertial Measurement Unit</strong>. It measures the robot's orientation in 3D space: yaw (left/right rotation), pitch (front/back tilt), and roll (side tilt). It also measures acceleration.</p>
+
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — THE INNER EAR</div>
+          <p>Your inner ear is your body's IMU. It tells your brain which way is up, whether you're tilting, and how fast you're moving. Without it, you'd fall over. The Pigeon 2.0 is the robot's inner ear — it's how the robot knows which direction it's facing (yaw/heading), which is critical for swerve drive field-oriented control. Without the Pigeon, the swerve drive would have no idea which way "forward" is relative to the field.</p>
+        </div>
+
+        <p>The Pigeon 2.0 connects to <strong>CAN Bus</strong> (on the CANivore network) and sends heading and acceleration data hundreds of times per second. It's used by:</p>
+        <ul>
+          <li>Swerve drive for field-oriented control (knowing where "field-forward" is)</li>
+          <li>Auto-balance routines (detecting tilt)</li>
+          <li>Odometry (tracking the robot's position on the field)</li>
+        </ul>
+
+        <!-- IMAGE PLACEHOLDER: Pigeon 2.0 -->
+        <!-- IMAGE PLACEHOLDER: Replace 'pigeon2.jpg' with your image. Place in /images folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🧭</div>
+          <div>PLACEHOLDER IMAGE</div>
+          <div class="ph-label">Replace with: images/pigeon2.jpg — Photo of Pigeon 2.0 with CAN wires</div>
+        </div>
+
+        <div class="tip-box">
+          <div class="label">💚 MOUNTING TIP</div>
+          <p>Mount the Pigeon 2.0 as close to the center of the robot as possible, and as low as possible. The closer to center, the less it gets confused by the robot's rotational inertia. Never mount it on a piece of metal that vibrates a lot — it will introduce noise into the gyro readings.</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>CAN Range</h2>
+        <span class="tag tag-orange">SITUATIONAL — NOT ON EVERY ROBOT</span>
+        <p>The <strong>CAN Range</strong> is a CTRE distance sensor that communicates over CAN Bus. It uses Time-of-Flight (ToF) technology — it sends out an invisible light pulse and measures how long it takes to bounce back — to measure distance to an object.</p>
+
+        <div class="warn-box">
+          <div class="label">⚠️ WHEN TO USE CAN RANGE</div>
+          <p>CAN Range is <strong>only used on robots that genuinely need precise distance sensing</strong> — for example, detecting exactly when a game piece has entered an intake, or measuring gap distance for a precise mechanism. It should NOT be added "just in case." Every CAN device adds to bus utilization and complexity. If a simpler sensor (like a beam break or limit switch) will do the job, use that instead.</p>
+        </div>
+
+        <p>Range: up to ~2 meters, with millimeter accuracy. It connects via CAN Bus and mounts directly to the robot using the mounting holes on the sensor body. Because it's CAN-based, it reports distance directly to the roboRIO (through the CANivore) without needing additional wiring to a DIO port.</p>
+      </div>
+
+      <div class="content-section">
+        <h2>CANANDCOLOR by Redux Robotics</h2>
+        <span class="tag tag-orange">SITUATIONAL — VERY IMPORTANT TO UNDERSTAND</span>
+        <p>The <strong>CANANDCOLOR</strong> is made by Redux Robotics. It's a multi-function CAN sensor that can detect <strong>color, proximity, and through-beam (game piece detection)</strong> — all over CAN Bus.</p>
+
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY</div>
+          <p>Think of the CANANDCOLOR as a sensor that can see both <em>what color something is</em> and <em>whether something is right in front of it</em>. Imagine a robotic arm that needs to know (1) whether it's holding a note vs. a ring, and (2) whether the note is fully seated. One CANANDCOLOR sensor can answer both questions.</p>
+        </div>
+
+        <p>Common uses in FRC:</p>
+        <ul>
+          <li>Detecting whether an intake has captured a game piece (proximity mode)</li>
+          <li>Differentiating between game piece types (color mode)</li>
+          <li>Confirming a ball or ring is seated in a mechanism before shooting</li>
+        </ul>
+        <p>The CANANDCOLOR is situational — not every game requires color detection. But when the game involves multiple types of game pieces, or when reliable game-piece detection is critical, this sensor is extremely valuable. It avoids the need for separate analog/DIO sensor wiring by keeping everything on CAN.</p>
+      </div>
+
+      <!-- MENTOR NOTE -->
+      <div class="mentor-note">
+        <div class="label">🔧 MENTOR NOTE</div>
+        <p>The Pigeon 2.0 has a known drift issue when placed in high-vibration environments — using software fusion with vision data (PhotonVision / April Tags) greatly reduces heading error over long matches. Ensure the Phoenix 6 firmware is up to date on the Pigeon. For CANANDCOLOR, check the Redux Robotics documentation for their vendor library (not included in WPILib by default).</p>
+      </div>
+
+      <!-- QUIZ: Lesson 6 -->
+      <div class="quiz-section">
+        <h2>⬜ LESSON 6 QUIZ</h2>
+        <div class="quiz-q" id="l6q1">
+          <div class="q-text">1. What body part is the Pigeon 2.0 compared to?</div>
+          <button class="quiz-option" data-q="l6q1" data-correct="false" onclick="selectOption(this)">A) The eyes</button>
+          <button class="quiz-option" data-q="l6q1" data-correct="true" onclick="selectOption(this)">B) The inner ear</button>
+          <button class="quiz-option" data-q="l6q1" data-correct="false" onclick="selectOption(this)">C) The spine</button>
+          <button class="quiz-option" data-q="l6q1" data-correct="false" onclick="selectOption(this)">D) The fingertips</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — The inner ear provides balance and orientation — exactly what the Pigeon 2.0 provides for the robot's swerve drive heading.</div>
+        </div>
+        <div class="quiz-q" id="l6q2">
+          <div class="q-text">2. When should you use a CAN Range sensor?</div>
+          <button class="quiz-option" data-q="l6q2" data-correct="false" onclick="selectOption(this)">A) On every robot as a standard component</button>
+          <button class="quiz-option" data-q="l6q2" data-correct="true" onclick="selectOption(this)">B) Only when the robot genuinely needs precise distance sensing that a simpler sensor can't provide</button>
+          <button class="quiz-option" data-q="l6q2" data-correct="false" onclick="selectOption(this)">C) Whenever you need to detect color</button>
+          <button class="quiz-option" data-q="l6q2" data-correct="false" onclick="selectOption(this)">D) To replace the Pigeon 2.0 for heading data</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — Only add CAN sensors when they solve a specific, necessary problem. Unnecessary sensors add CAN Bus load and complexity.</div>
+        </div>
+        <div class="quiz-q" id="l6q3">
+          <div class="q-text">3. What can the CANANDCOLOR detect?</div>
+          <button class="quiz-option" data-q="l6q3" data-correct="false" onclick="selectOption(this)">A) Only color</button>
+          <button class="quiz-option" data-q="l6q3" data-correct="false" onclick="selectOption(this)">B) Only proximity</button>
+          <button class="quiz-option" data-q="l6q3" data-correct="true" onclick="selectOption(this)">C) Color, proximity, and through-beam game piece detection</button>
+          <button class="quiz-option" data-q="l6q3" data-correct="false" onclick="selectOption(this)">D) Distance up to 10 meters</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>C — The CANANDCOLOR is a multi-mode sensor. Color mode differentiates game pieces. Proximity and through-beam modes detect game piece presence.</div>
+        </div>
+        <div class="quiz-score" id="l6-score"></div>
+        <button class="quiz-submit" onclick="submitQuiz('l6', ['l6q1','l6q2','l6q3'], 'l6-score')">CHECK ANSWERS</button>
+      </div>
+
+      <button class="lesson-complete-btn" id="complete-l6" onclick="markComplete('l6')">✓ MARK LESSON COMPLETE</button>
+      <br/><br/>
+      <button class="hero-cta" onclick="showLesson('l7')">NEXT: LESSON 7 — VISION & COMMUNICATION →</button>
+    </section><!-- END LESSON 6 -->
+
+
+    <!-- ============================================================
+         LESSON 7: Vision & Communication
+         ============================================================ -->
+    <section id="page-l7" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">LESSON 07 — VISION & COMMUNICATION</div>
+        <h1>Vision &amp; Communication</h1>
+        <p class="subtitle">Orange Pi 5, cameras, radio, Ethernet, and the C Buck Converter — the robot's eyes and voice.</p>
+      </div>
+
+      <div class="content-section">
+        <div class="back-ref" onclick="showLesson('l3')">Remember from Lesson 3: The roboRIO receives driver commands via the Radio through Ethernet. Now we'll explain how the whole communication chain works. →</div>
+
+        <h2>The Radio (by Vivid-Hosting)</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — THE WI-FI ROUTER</div>
+          <p>At home, your Wi-Fi router connects to the internet (the FMS / Field Management System) and broadcasts a wireless signal to your devices (driver station laptop and the robot's roboRIO). Without it, your devices can't communicate. The Robot Radio does exactly this — it wirelessly bridges the driver station on the field to the robot.</p>
+        </div>
+        <p>The <strong>radio (by Vivid-Hosting)</strong> is the FRC-approved 802.11 radio used since the 2024 season. It connects to:</p>
+        <ul>
+          <li><strong>Ethernet port #1</strong> → connects to the <strong>roboRIO</strong></li>
+          <li><strong>Ethernet port #2</strong> → connects to the <strong>Orange Pi 5</strong></li>
+          <li><strong>Power</strong> → from the Mini Power Module's regulated output (or similar 12V regulated source)</li>
+        </ul>
+        <p>The radio receives wireless commands from the driver station (running the FRC Driver Station software) and forwards them to the roboRIO. It also passes field match data (autonomous period start, enable/disable signals) from the FMS at competitions.</p>
+        <div class="warn-box">
+          <div class="label">⚠️ CRITICAL — RADIO CONFIGURATION</div>
+          <p>The radio must be configured (flashed) with the correct team number using the FRC Radio Configuration Utility before each competition. An unconfigured radio will not connect to the Field Management System. This is one of the most common causes of robots being unable to connect at competition.</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>Ethernet on the Robot</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>Ethernet is the same kind of networking cable used in homes and offices — it's the standard for wired high-speed data. On the robot, Ethernet is used to connect devices that need high-bandwidth, reliable communication.</p>
+        <p>On our robot, Ethernet connects:</p>
+        <ul>
+          <li><strong>Radio → roboRIO</strong> (driver commands, FMS data)</li>
+          <li><strong>Radio → Orange Pi 5</strong> (vision data flows from the Pi to roboRIO via the radio's internal switch)</li>
+        </ul>
+        <div class="tip-box">
+          <div class="label">💚 ETHERNET CABLE TIPS</div>
+          <p>Use CAT5e or CAT6 Ethernet cables. Make sure connectors are fully clicked in — a half-seated Ethernet connector is one of the hardest intermittent problems to diagnose. If a robot behaves normally in the pits but fails on the field, check all Ethernet connections first.</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>Orange Pi 5 — The Vision Co-Processor</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — A DEDICATED VISION EXPERT</div>
+          <p>Imagine the roboRIO (the brain/principal) also had to personally watch every security camera in the building and call out the location of every visitor, while simultaneously running all the other school operations. It would get overwhelmed. So instead, we hire a specialist — the Orange Pi 5 — whose only job is to watch the cameras, identify AprilTags, calculate field positions, and report them to the principal. The principal (roboRIO) just hears the reports and acts on them, without doing any of the vision work itself.</p>
+        </div>
+        <p>The <strong>Orange Pi 5</strong> is a single-board computer (like a Raspberry Pi, but more powerful) that runs vision software — typically <strong>PhotonVision</strong> or <strong>Limelight software</strong>. Its job is to:</p>
+        <ul>
+          <li>Process camera frames looking for <strong>AprilTags</strong> (2D barcodes on the field)</li>
+          <li>Calculate the robot's pose (position + orientation) on the field using multi-camera tag detection</li>
+          <li>Send that pose data to the roboRIO via Ethernet (using PhotonVision's network tables)</li>
+        </ul>
+        <p>The Orange Pi 5 connects to:</p>
+        <ul>
+          <li><strong>Ethernet</strong> → to the Radio (which bridges data to the roboRIO)</li>
+          <li><strong>USB</strong> → cameras plugged directly in</li>
+          <li><strong>Power</strong> → from the C Buck Converter</li>
+        </ul>
+
+        <!-- IMAGE PLACEHOLDER: Orange Pi 5 -->
+        <!-- IMAGE PLACEHOLDER: Replace 'orangepi5.jpg' with your image. Place in /images folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🖥️</div>
+          <div>PLACEHOLDER IMAGE</div>
+          <div class="ph-label">Replace with: images/orangepi5.jpg — Photo of Orange Pi 5 with Ethernet and USB ports labeled</div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>C Buck Converter</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <div class="analogy-box">
+          <div class="label">💡 ANALOGY — THE PHONE CHARGER</div>
+          <p>Your phone needs 5V. Your wall outlet provides 120V (AC). Your charger is a <strong>buck converter</strong> — it takes high voltage in, and outputs lower voltage out. The C Buck Converter on the robot takes the robot's 12V power and converts it to the correct voltage (typically USB-C at 5V or a specific barrel connector voltage) that the Orange Pi 5 needs. Without it, plugging the Pi directly into the robot's 12V supply would destroy it.</p>
+        </div>
+        <p>The complete power chain for the Orange Pi 5:</p>
+        <div class="power-flow">
+          <div class="node">⚡ PDH (12V raw)</div>
+          <div class="arrow">   ↓ via dedicated channel</div>
+          <div class="node">🔌 Mini Power Module (clean regulated 12V)</div>
+          <div class="arrow">   ↓ output wire to</div>
+          <div class="node">🔄 C Buck Converter (converts 12V → correct Pi voltage, ~5V via USB-C or barrel)</div>
+          <div class="arrow">   ↓ USB-C or barrel connector</div>
+          <div class="node">🖥️ Orange Pi 5 (powered up and running vision)</div>
+        </div>
+        <p>Think of it like this: the Mini Power Module is a clean, dedicated wall outlet. The C Buck Converter is the adapter that makes sure the Orange Pi 5 gets exactly the right voltage from that outlet — just like how your phone charger converts the wall's 120V to the 5V your phone needs.</p>
+      </div>
+
+      <div class="content-section">
+        <h2>Cameras on the Robot</h2>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>FRC robots use cameras for two purposes: <strong>vision processing</strong> (finding AprilTags, detecting game pieces) and <strong>driver view</strong> (seeing what the robot sees on the driver station display).</p>
+        <h3>USB Cameras</h3>
+        <p>Simple webcams or machine-vision cameras that plug into USB. They connect to the Orange Pi 5 (for vision processing) or directly to the roboRIO (for basic driver view streaming). USB cameras are simpler to set up but have limited resolution and frame rate.</p>
+        <h3>IP Cameras / GigE Cameras</h3>
+        <p>Higher-performance cameras that connect via Ethernet and have their own IP address on the network. They're used for higher-resolution vision at higher frame rates. They plug into the robot's Ethernet network (via the Radio's switch ports).</p>
+        <div class="tip-box">
+          <div class="label">💚 CAMERA PLACEMENT</div>
+          <p>For AprilTag detection, cameras should be mounted as high as possible with a wide field of view, angled slightly downward. The further from center, the better the parallax for pose estimation. Use PhotonVision's camera calibration tool before every season — calibration is critical for accurate pose estimates.</p>
+        </div>
+      </div>
+
+      <!-- MENTOR NOTE -->
+      <div class="mentor-note">
+        <div class="label">🔧 MENTOR NOTE</div>
+        <p>The Orange Pi 5 runs Ubuntu 22.04 with PhotonVision installed as a service. Access the PhotonVision web dashboard at the Pi's IP (usually 10.TE.AM.11) to tune pipelines. Ensure the Pi's hostname is set correctly for NetworkTables connection to the roboRIO. The C Buck Converter used is typically a DROK or similar 12V-to-5V/9V USB-C PD converter — verify the Pi's power requirements (the Orange Pi 5 can pull ~10W at peak). Confirm the MPM channel fuse rating matches.</p>
+      </div>
+
+      <!-- QUIZ: Lesson 7 -->
+      <div class="quiz-section">
+        <h2>⬜ LESSON 7 QUIZ</h2>
+        <div class="quiz-q" id="l7q1">
+          <div class="q-text">1. What is the Radio's job on the robot?</div>
+          <button class="quiz-option" data-q="l7q1" data-correct="false" onclick="selectOption(this)">A) It converts 12V power to 5V for the Orange Pi</button>
+          <button class="quiz-option" data-q="l7q1" data-correct="true" onclick="selectOption(this)">B) It wirelessly connects the driver station to the robot, bridging commands to the roboRIO</button>
+          <button class="quiz-option" data-q="l7q1" data-correct="false" onclick="selectOption(this)">C) It processes camera images for AprilTag detection</button>
+          <button class="quiz-option" data-q="l7q1" data-correct="false" onclick="selectOption(this)">D) It distributes power to the motors via CAN Bus</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — The radio is the wireless bridge. Driver station → Radio (air) → roboRIO (Ethernet). Without it, there's no control.</div>
+        </div>
+        <div class="quiz-q" id="l7q2">
+          <div class="q-text">2. What does the C Buck Converter do?</div>
+          <button class="quiz-option" data-q="l7q2" data-correct="false" onclick="selectOption(this)">A) It manages the CAN Bus network</button>
+          <button class="quiz-option" data-q="l7q2" data-correct="true" onclick="selectOption(this)">B) It converts robot 12V power to the correct voltage for the Orange Pi 5</button>
+          <button class="quiz-option" data-q="l7q2" data-correct="false" onclick="selectOption(this)">C) It is the same as the Mini Power Module</button>
+          <button class="quiz-option" data-q="l7q2" data-correct="false" onclick="selectOption(this)">D) It amplifies the radio signal</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — Buck converter = voltage step-down. 12V in → 5V (or target voltage) out via USB-C or barrel connector.</div>
+        </div>
+        <div class="quiz-q" id="l7q3">
+          <div class="q-text">3. In order, what is the power chain from the PDH to the Orange Pi 5?</div>
+          <button class="quiz-option" data-q="l7q3" data-correct="false" onclick="selectOption(this)">A) PDH → Orange Pi 5 → Buck Converter → Mini Power Module</button>
+          <button class="quiz-option" data-q="l7q3" data-correct="false" onclick="selectOption(this)">B) PDH → Buck Converter → Mini Power Module → Orange Pi 5</button>
+          <button class="quiz-option" data-q="l7q3" data-correct="true" onclick="selectOption(this)">C) PDH → Mini Power Module → C Buck Converter → Orange Pi 5</button>
+          <button class="quiz-option" data-q="l7q3" data-correct="false" onclick="selectOption(this)">D) PDH → roboRIO → Buck Converter → Orange Pi 5</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>C — PDH provides raw 12V → MPM cleans it → Buck Converter steps it down → Orange Pi 5 receives correct voltage.</div>
+        </div>
+        <div class="quiz-score" id="l7-score"></div>
+        <button class="quiz-submit" onclick="submitQuiz('l7', ['l7q1','l7q2','l7q3'], 'l7-score')">CHECK ANSWERS</button>
+      </div>
+
+      <button class="lesson-complete-btn" id="complete-l7" onclick="markComplete('l7')">✓ MARK LESSON COMPLETE</button>
+      <br/><br/>
+      <button class="hero-cta" onclick="showLesson('l8')">NEXT: LESSON 8 — PUTTING IT ALL TOGETHER →</button>
+    </section><!-- END LESSON 7 -->
+
+
+    <!-- ============================================================
+         LESSON 8: Putting It All Together
+         ============================================================ -->
+    <section id="page-l8" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">LESSON 08 — FULL SYSTEM REVIEW</div>
+        <h1>Putting It All Together</h1>
+        <p class="subtitle">The complete picture — every component connected, every relationship explained.</p>
+      </div>
+
+      <div class="content-section">
+        <h2>The Full Robot Electrical System</h2>
+        <p>You've now learned every major component. Let's see how it all connects. Read through this diagram carefully — every line represents a real connection on the robot.</p>
+
+        <div class="power-flow">
+          <div class="node">━━━━━━━━ POWER CHAIN ━━━━━━━━</div>
+          <div>🔋 BATTERY (12V) ──→ 🔴 MAIN BREAKER (120A) ──→ ⚡ PDH</div>
+          <br/>
+          <div class="node">━━━━━━━━ FROM PDH ━━━━━━━━</div>
+          <div>PDH ch.1–8  ──→ Kraken X60 (drive motors ×4) [40A fuse each]</div>
+          <div>PDH ch.9–12 ──→ Kraken X44 (steer motors ×4) [30A fuse each]</div>
+          <div>PDH ch.13   ──→ roboRIO [10A dedicated output]</div>
+          <div>PDH ch.14   ──→ Mini Power Module [20A fuse]</div>
+          <div>PDH ch.15+  ──→ Additional mechanisms...</div>
+          <br/>
+          <div class="node">━━━━━━━━ COMMUNICATION (CAN) ━━━━━━━━</div>
+          <div>roboRIO ─[USB]─→ CANivore ─[CAN Bus]─→ Kraken motors (×8)</div>
+          <div>                               └──→ Pigeon 2.0</div>
+          <div>                               └──→ CANCoders (×4, in swerve modules)</div>
+          <div>                               └──→ CANANDCOLOR / CAN Range (if equipped)</div>
+          <div>roboRIO ─[CAN Bus]─→ PDH (power monitoring)</div>
+          <br/>
+          <div class="node">━━━━━━━━ VISION / COMMS ━━━━━━━━</div>
+          <div>Radio ─[Ethernet]─→ roboRIO</div>
+          <div>Radio ─[Ethernet]─→ Orange Pi 5 ─[USB]─→ Cameras</div>
+          <div>Mini Power Module ─→ C Buck Converter ─→ Orange Pi 5 (power)</div>
+          <div>Mini Power Module ─→ Radio (power)</div>
+          <br/>
+          <div class="node">━━━━━━━━ OTHER ━━━━━━━━</div>
+          <div>roboRIO RSL port ──→ Robot Signal Light (RSL)</div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>Full Wiring Diagram Examples</h2>
+        <p>Below are placeholder spots for real wiring diagram images. Replace these with actual wiring diagram photos or diagrams from your team or from other FRC teams (with permission).</p>
+
+        <!-- IMAGE PLACEHOLDER: Full Wiring Diagram 1 -->
+        <!-- IMAGE PLACEHOLDER: Replace 'wiring-diagram-1.jpg' with your wiring diagram image. Place in /images folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">📐</div>
+          <div>WIRING DIAGRAM PLACEHOLDER</div>
+          <div class="ph-label">Replace with: images/wiring-diagram-1.jpg — Full robot wiring diagram (top view)</div>
+        </div>
+
+        <!-- IMAGE PLACEHOLDER: Full Wiring Diagram 2 -->
+        <!-- IMAGE PLACEHOLDER: Replace 'wiring-diagram-2.jpg' with a second wiring diagram image. Place in /images folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🗺️</div>
+          <div>WIRING DIAGRAM PLACEHOLDER</div>
+          <div class="ph-label">Replace with: images/wiring-diagram-2.jpg — Electronics board layout with components labeled</div>
+        </div>
+
+        <!-- IMAGE PLACEHOLDER: Full Wiring Diagram 3 from another FRC team -->
+        <!-- IMAGE PLACEHOLDER: Replace 'wiring-diagram-team-example.jpg' with an example from another team. Make sure you have permission! -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🤖</div>
+          <div>COMMUNITY WIRING EXAMPLE PLACEHOLDER</div>
+          <div class="ph-label">Replace with: images/wiring-diagram-team-example.jpg — Example from another FRC team (cite source + get permission)</div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>Cross-Reference: Everything We Learned</h2>
+        <p>Let's walk through each component one final time, with a callback to where you learned it:</p>
+        <table class="spec-table">
+          <tr><th>Component</th><th>Analogy</th><th>Covered In</th></tr>
+          <tr><td>Battery</td><td>Water tower (pressure source)</td><td>Lesson 2</td></tr>
+          <tr><td>Main Breaker</td><td>Main circuit breaker panel</td><td>Lesson 2</td></tr>
+          <tr><td>PDH</td><td>House fuse box</td><td>Lesson 2, Components page</td></tr>
+          <tr><td>roboRIO 2.0</td><td>The brain</td><td>Lesson 3</td></tr>
+          <tr><td>System Core</td><td>Vice principal / co-processor</td><td>Lesson 3</td></tr>
+          <tr><td>RSL</td><td>Status indicator light</td><td>Lesson 3</td></tr>
+          <tr><td>CAN Bus</td><td>Office intercom system</td><td>Lesson 4</td></tr>
+          <tr><td>CANivore</td><td>Dedicated expressway</td><td>Lesson 4</td></tr>
+          <tr><td>Mini Power Module</td><td>Clean power strip outlet</td><td>Lesson 4</td></tr>
+          <tr><td>Kraken X60/X44</td><td>All-in-one smart motor</td><td>Lesson 5</td></tr>
+          <tr><td>MK5i Swerve Module</td><td>Shopping cart wheel (omnidirectional)</td><td>Lesson 5</td></tr>
+          <tr><td>Pigeon 2.0</td><td>Inner ear / gyroscope</td><td>Lesson 6</td></tr>
+          <tr><td>CAN Range</td><td>Ultrasonic ruler (situational)</td><td>Lesson 6</td></tr>
+          <tr><td>CANANDCOLOR</td><td>Color + presence detector</td><td>Lesson 6</td></tr>
+          <tr><td>Radio</td><td>Wi-Fi router</td><td>Lesson 7</td></tr>
+          <tr><td>Orange Pi 5</td><td>Dedicated vision expert</td><td>Lesson 7</td></tr>
+          <tr><td>C Buck Converter</td><td>Phone charger / voltage adapter</td><td>Lesson 7</td></tr>
+          <tr><td>Cameras</td><td>Eyes of the robot</td><td>Lesson 7</td></tr>
+        </table>
+      </div>
+
+      <!-- FINAL QUIZ: Lesson 8 -->
+      <div class="quiz-section">
+        <h2>⬜ FINAL REVIEW QUIZ</h2>
+        <div class="quiz-q" id="l8q1">
+          <div class="q-text">1. What is the correct order of power flow from the battery to the motors?</div>
+          <button class="quiz-option" data-q="l8q1" data-correct="false" onclick="selectOption(this)">A) Battery → PDH → Main Breaker → Motors</button>
+          <button class="quiz-option" data-q="l8q1" data-correct="true" onclick="selectOption(this)">B) Battery → Main Breaker → PDH → Motors</button>
+          <button class="quiz-option" data-q="l8q1" data-correct="false" onclick="selectOption(this)">C) Battery → roboRIO → PDH → Motors</button>
+          <button class="quiz-option" data-q="l8q1" data-correct="false" onclick="selectOption(this)">D) Battery → CANivore → PDH → Motors</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — Battery → Main Breaker → PDH → (individual channels) → Motors. The roboRIO and CANivore are in the communication path, not the power path.</div>
+        </div>
+        <div class="quiz-q" id="l8q2">
+          <div class="q-text">2. How does the Orange Pi 5 communicate with the roboRIO?</div>
+          <button class="quiz-option" data-q="l8q2" data-correct="false" onclick="selectOption(this)">A) Directly over CAN Bus</button>
+          <button class="quiz-option" data-q="l8q2" data-correct="true" onclick="selectOption(this)">B) Via Ethernet through the Radio's network switch</button>
+          <button class="quiz-option" data-q="l8q2" data-correct="false" onclick="selectOption(this)">C) Via USB directly to the roboRIO</button>
+          <button class="quiz-option" data-q="l8q2" data-correct="false" onclick="selectOption(this)">D) Through the PDH's communication ports</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — Orange Pi 5 → Ethernet → Radio (acts as switch) → Ethernet → roboRIO. They're on the same local network.</div>
+        </div>
+        <div class="quiz-q" id="l8q3">
+          <div class="q-text">3. How many total Kraken motors are on a full 4-module MK5i swerve drivetrain?</div>
+          <button class="quiz-option" data-q="l8q3" data-correct="false" onclick="selectOption(this)">A) 4</button>
+          <button class="quiz-option" data-q="l8q3" data-correct="false" onclick="selectOption(this)">B) 6</button>
+          <button class="quiz-option" data-q="l8q3" data-correct="true" onclick="selectOption(this)">C) 8</button>
+          <button class="quiz-option" data-q="l8q3" data-correct="false" onclick="selectOption(this)">D) 12</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>C — 4 drive (X60) + 4 steer (X44) = 8 total Kraken motors for the drivetrain alone.</div>
+        </div>
+        <div class="quiz-q" id="l8q4">
+          <div class="q-text">4. What does the RSL pattern of a SOLID (non-blinking) orange light mean?</div>
+          <button class="quiz-option" data-q="l8q4" data-correct="false" onclick="selectOption(this)">A) Robot is in autonomous mode</button>
+          <button class="quiz-option" data-q="l8q4" data-correct="true" onclick="selectOption(this)">B) Robot is powered and connected but NOT enabled</button>
+          <button class="quiz-option" data-q="l8q4" data-correct="false" onclick="selectOption(this)">C) Battery is critically low</button>
+          <button class="quiz-option" data-q="l8q4" data-correct="false" onclick="selectOption(this)">D) CAN Bus has an error</button>
+          <div class="answer-key"><div class="ak-label">ANSWER KEY (MENTOR)</div>B — Solid = powered/connected, not enabled. Slow blink = teleop enabled. Fast blink = auto enabled.</div>
+        </div>
+        <div class="quiz-score" id="l8-score"></div>
+        <button class="quiz-submit" onclick="submitQuiz('l8', ['l8q1','l8q2','l8q3','l8q4'], 'l8-score')">CHECK ANSWERS</button>
+      </div>
+
+      <button class="lesson-complete-btn" id="complete-l8" onclick="markComplete('l8')">✓ MARK LESSON COMPLETE</button>
+      <br/><br/>
+      <!-- CONGRATULATIONS BLOCK -->
+      <div class="analogy-box" style="text-align:center;padding:2rem;">
+        <div class="label">🎉 CONGRATULATIONS</div>
+        <p style="font-size:1.1rem;font-weight:600;color:var(--accent-primary);margin-bottom:0.5rem;">You've completed all 8 lessons!</p>
+        <p>You now understand the full electrical system of an FRC robot. Continue to the Components page for deep-dives on each part, or review the Checklists for competition day.</p>
+      </div>
+      <br/>
+      <button class="hero-cta" onclick="showPage('components')">EXPLORE THE COMPONENT LIBRARY →</button>
+    </section><!-- END LESSON 8 -->
+
+
+    <!-- ============================================================
+         PAGE: COMPONENTS (deep-dive reference)
+         ============================================================ -->
+    <section id="page-components" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">REFERENCE</div>
+        <h1>Component Library</h1>
+        <p class="subtitle">Deep-dive reference for every component we use. Click any component for full details.</p>
+      </div>
+
+      <!-- COMPONENT: PDH -->
+      <div class="component-card" id="comp-pdh">
+        <h3>Power Distribution Hub (PDH)</h3>
+        <div class="cc-tag">CTRE — POWER DISTRIBUTION</div>
+        <span class="tag tag-blue">CRITICAL COMPONENT</span>
+        <p>The PDH (Power Distribution Hub by CTRE) is the power manager of the entire robot. Every component that needs electricity gets it from the PDH — directly or indirectly. Think of it as the electrical panel in a house: it takes one big power source (the battery) and distributes it through individual protected circuits to everything that needs it.</p>
+        <h3>What It Does</h3>
+        <p>The PDH takes 12V power from the main breaker and routes it through <strong>20 high-current channels</strong> (up to 40A each, protected by blade fuses) and <strong>4 low-current "switchable" channels</strong> (up to 15A, software-controlled). It also connects to CAN Bus so the roboRIO can read real-time current draw from each channel — incredibly useful for detecting motor stalls or debugging power problems.</p>
+        <h3>How to Connect It</h3>
+        <p>Input: thick red (+) and black (−) cables from the main breaker output. Output: individual channels with fuses, each going to a motor controller or device. CAN: yellow/green CAN wires connecting to the rest of the CAN Bus chain.</p>
+        <div class="warn-box"><div class="label">⚠️ COMMON MISTAKES</div>
+          <p>1. Installing the wrong fuse size — always match the fuse to the wire gauge and device current rating, NOT the maximum current the device can draw. 2. Loose screws on PDH terminals — vibration can loosen them over a season, causing intermittent power loss. Check with a torque screwdriver before every competition.</p>
+        </div>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://store.ctr-electronics.com/pdh" target="_blank"><span class="rl-icon">📄</span> CTRE PDH Product Page</a>
+          <a class="resource-link" href="https://docs.wpilib.org/en/stable/docs/software/can-devices/power-distribution-module.html" target="_blank"><span class="rl-icon">📚</span> WPILib PDH Docs</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: roboRIO 2.0 -->
+      <div class="component-card">
+        <h3>roboRIO 2.0</h3>
+        <div class="cc-tag">NATIONAL INSTRUMENTS / NI — ROBOT CONTROLLER</div>
+        <span class="tag tag-blue">CRITICAL COMPONENT</span>
+        <p>The roboRIO 2.0 is the mandatory FRC robot controller — the brain. It runs your team's robot code (Java/C++/Python via WPILib), manages all CAN Bus communication, interfaces with the radio, and provides digital/analog I/O for sensors. It receives 12V from the PDH and regulates it internally for safe logic-level operation.</p>
+        <p><strong>Key ports:</strong> 1× USB-A (host), 1× USB-C (programming/config), 2× Ethernet (typically only 1 used — to radio), 10× DIO, 4× AIO, 1× SPI, 1× I2C, 1× RS-232, CAN Bus in/out, RSL output.</p>
+        <div class="tip-box"><div class="label">💚 ANNUAL TASK</div><p>At the start of every season, re-image the roboRIO with the current year's roboRIO image using the NI FRC Game Tools. An out-of-date image may cause connection issues with the Driver Station.</p></div>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-3/imaging-your-roborio.html" target="_blank"><span class="rl-icon">📚</span> WPILib roboRIO Imaging Guide</a>
+          <a class="resource-link" href="https://www.ni.com/en-us/support/model.roborio-2.0.html" target="_blank"><span class="rl-icon">📄</span> NI roboRIO 2.0 Page</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: System Core -->
+      <div class="component-card">
+        <h3>System Core</h3>
+        <div class="cc-tag">CTRE — CO-PROCESSOR</div>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The System Core is CTRE's high-performance co-processor that works alongside the roboRIO. It connects via CAN Bus and handles high-speed Phoenix 6 Pro features, enabling time-synchronized motor control at up to 1kHz. It reduces the load on the roboRIO for teams running complex swerve and mechanism control.</p>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://store.ctr-electronics.com/pages/system-core" target="_blank"><span class="rl-icon">📄</span> CTRE System Core Docs</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: Kraken X60 -->
+      <div class="component-card">
+        <h3>Kraken X60 Motor</h3>
+        <div class="cc-tag">CTRE — BRUSHLESS MOTOR + TALON FX CONTROLLER</div>
+        <span class="tag tag-blue">PRIMARY DRIVE MOTOR</span>
+        <p>The Kraken X60 is CTRE's flagship brushless motor with integrated TalonFX motor controller. It delivers ~1000W peak power at ~1.2 lbs. It connects to the PDH (40A channel) for power and to the CANivore CAN Bus for control. It has a built-in 2048 CPR absolute encoder, eliminating the need for external encoders on the drive wheels.</p>
+        <table class="spec-table">
+          <tr><th>Spec</th><th>Value</th></tr>
+          <tr><td>Peak Power</td><td>~1000W</td></tr>
+          <tr><td>Free Speed</td><td>~6000 RPM</td></tr>
+          <tr><td>Stall Torque</td><td>~9.4 N·m</td></tr>
+          <tr><td>Weight</td><td>~1.2 lbs</td></tr>
+          <tr><td>PDH Fuse</td><td>40A blade fuse</td></tr>
+        </table>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://store.ctr-electronics.com/products/kraken-x60" target="_blank"><span class="rl-icon">📄</span> CTRE Kraken X60</a>
+          <a class="resource-link" href="https://pro.docs.ctr-electronics.com" target="_blank"><span class="rl-icon">📚</span> Phoenix 6 Pro Docs</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: Kraken X44 -->
+      <div class="component-card">
+        <h3>Kraken X44 Motor</h3>
+        <div class="cc-tag">CTRE — COMPACT BRUSHLESS MOTOR + TALON FX CONTROLLER</div>
+        <span class="tag tag-blue">SWERVE STEERING MOTOR</span>
+        <p>Compact version of the Kraken X60. Same TalonFX controller and CAN Bus interface, smaller and lighter package. Used for swerve steering modules (MK5i) where the motor must fit inside the tight space of the steering pod. Same wiring approach as X60 — power from PDH (30A channel) and CAN from CANivore.</p>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://store.ctr-electronics.com/products/kraken-x44" target="_blank"><span class="rl-icon">📄</span> CTRE Kraken X44</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: MK5i -->
+      <div class="component-card">
+        <h3>MK5i Swerve Module</h3>
+        <div class="cc-tag">SWERVE DRIVE SPECIALTIES — DRIVETRAIN MODULE</div>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The MK5i is a complete swerve module housing one Kraken X60 (drive), one Kraken X44 (steer), and one CANCoder absolute encoder (steer position). Four modules create a fully swerve drivetrain. Gear ratios available: L1, L2, L3, L4 — your team's chosen ratio should be documented. The CANCoder ensures the wheel angle is always known absolutely, even after power cycling.</p>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://www.swervedrivespecialties.com/products/mk5i-swerve-module" target="_blank"><span class="rl-icon">📄</span> SDS MK5i Page</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: CANivore -->
+      <div class="component-card">
+        <h3>CANivore</h3>
+        <div class="cc-tag">CTRE — USB-CAN BRIDGE</div>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The CANivore connects to the roboRIO via USB and creates a separate, dedicated CAN Bus network at 1 Mbit/s. All CTRE Phoenix 6 devices (Kraken motors, Pigeon 2.0, CANCoders, CAN Range) connect to this bus, offloading traffic from the roboRIO's internal CAN. Essential for high-performance swerve drives. Powered from the Mini Power Module.</p>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://store.ctr-electronics.com/canivore" target="_blank"><span class="rl-icon">📄</span> CTRE CANivore Page</a>
+          <a class="resource-link" href="https://pro.docs.ctr-electronics.com/en/stable/docs/canivore/canivore-intro.html" target="_blank"><span class="rl-icon">📚</span> CANivore Setup Docs</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: Pigeon 2.0 -->
+      <div class="component-card">
+        <h3>Pigeon 2.0</h3>
+        <div class="cc-tag">CTRE — IMU / GYROSCOPE</div>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The Pigeon 2.0 is a 9-axis IMU (3-axis gyroscope + 3-axis accelerometer + 3-axis magnetometer) that reports yaw, pitch, and roll to the roboRIO via CAN Bus. Critical for field-oriented swerve drive — the robot must know its heading at all times. Mount near the robot's center of mass, away from high-vibration sources.</p>
+        <div class="warn-box"><div class="label">⚠️ CALIBRATION</div><p>The Pigeon 2.0 must be level when it boots. If the robot is on an angle when powered on, the IMU will read an incorrect zero heading. Always power on the robot on a flat surface.</p></div>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://store.ctr-electronics.com/pigeon-2" target="_blank"><span class="rl-icon">📄</span> CTRE Pigeon 2.0 Page</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: Mini Power Module -->
+      <div class="component-card">
+        <h3>Mini Power Module (MPM)</h3>
+        <div class="cc-tag">CTRE — REGULATED POWER OUTPUT</div>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>The Mini Power Module provides clean, regulated power to sensitive electronics — specifically the CANivore, Radio, and the C Buck Converter that powers the Orange Pi 5. It draws from the PDH and outputs stable voltage even when the rest of the robot's power is fluctuating due to motor loads. Connects to CAN Bus for monitoring.</p>
+      </div>
+
+      <!-- COMPONENT: Main Breaker -->
+      <div class="component-card">
+        <h3>Main Breaker</h3>
+        <div class="cc-tag">MR. FUSE / SNAP ACTION — MASTER SWITCH + 120A PROTECTOR</div>
+        <span class="tag tag-blue">CRITICAL SAFETY COMPONENT</span>
+        <p>The main breaker is mounted visibly on the outside of the robot (FRC rules requirement). It is both the robot's on/off switch and a 120A overcurrent protection device. It must be accessible in emergencies and must be the first thing disconnected after removing the battery.</p>
+      </div>
+
+      <!-- COMPONENT: Battery -->
+      <div class="component-card">
+        <h3>Battery (FRC / Energizer)</h3>
+        <div class="cc-tag">SEALED LEAD-ACID — 12V 18AH</div>
+        <span class="tag tag-blue">CRITICAL COMPONENT</span>
+        <p>The sole power source for the robot. 12V sealed lead-acid, ~18Ah. The Energizer FRC battery offers lower internal resistance for better performance in high-draw scenarios. Charge fully before every match (target: 12.6V+). Never leave discharged — it damages lead-acid chemistry. Always label batteries with charge time and use a dedicated FRC battery charger.</p>
+      </div>
+
+      <!-- COMPONENT: RSL -->
+      <div class="component-card">
+        <h3>Robot Signal Light (RSL)</h3>
+        <div class="cc-tag">FRC REQUIRED — STATUS INDICATOR</div>
+        <span class="tag tag-blue">SAFETY REQUIRED</span>
+        <p>Mandatory orange indicator light. Connects to the roboRIO's RSL port. Blink patterns indicate robot state: solid = connected/disabled, slow blink = teleop enabled, fast blink = auto. Must be visible from outside the robot. Failure to have a working RSL = failed inspection.</p>
+      </div>
+
+      <!-- COMPONENT: CAN Range -->
+      <div class="component-card">
+        <h3>CAN Range</h3>
+        <div class="cc-tag">CTRE — TIME-OF-FLIGHT DISTANCE SENSOR</div>
+        <span class="tag tag-orange">SITUATIONAL</span>
+        <p>Time-of-Flight distance sensor on CAN Bus. Range up to ~2m. Use only when precise distance measurement is needed and a simpler solution won't work. Adds to CAN Bus utilization — justify its use before adding it to the robot.</p>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://store.ctr-electronics.com/can-range" target="_blank"><span class="rl-icon">📄</span> CTRE CAN Range</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: CANANDCOLOR -->
+      <div class="component-card">
+        <h3>CANANDCOLOR</h3>
+        <div class="cc-tag">REDUX ROBOTICS — COLOR + PROXIMITY CAN SENSOR</div>
+        <span class="tag tag-orange">SITUATIONAL</span>
+        <p>Multi-mode CAN sensor detecting color, proximity, and through-beam presence. Used when game piece detection or differentiation is needed. Install the Redux vendor library in WPILib. Configure using the Redux Tuner. Very capable sensor for game-piece-aware mechanisms.</p>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://docs.reduxrobotics.com/canandcolor" target="_blank"><span class="rl-icon">📄</span> Redux CANANDCOLOR Docs</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: Orange Pi 5 -->
+      <div class="component-card">
+        <h3>Orange Pi 5</h3>
+        <div class="cc-tag">SINGLE-BOARD COMPUTER — VISION CO-PROCESSOR</div>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>Runs PhotonVision for AprilTag detection and robot pose estimation. Connects to the Radio via Ethernet, cameras via USB, and receives power from the C Buck Converter (which draws from the Mini Power Module). Access at 10.TE.AM.11 via browser. Must be configured and calibrated at the start of each season.</p>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://docs.photonvision.org" target="_blank"><span class="rl-icon">📚</span> PhotonVision Docs</a>
+          <a class="resource-link" href="https://orangepi.org" target="_blank"><span class="rl-icon">📄</span> Orange Pi 5 Specs</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: Radio -->
+      <div class="component-card">
+        <h3>Radio (by Vivid-Hosting)</h3>
+        <div class="cc-tag">VIVID-HOSTING — FRC 802.11 RADIO</div>
+        <span class="tag tag-blue">CRITICAL COMPONENT</span>
+        <p>The FRC-approved radio since 2024. Bridges wireless driver station commands to the robot's roboRIO via Ethernet. Also connects the Orange Pi 5 to the robot's network. Must be configured with the FRC Radio Configuration Utility before every competition. Powers from the Mini Power Module. Two Ethernet ports: one to roboRIO, one to Orange Pi 5.</p>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-3/radio-programming.html" target="_blank"><span class="rl-icon">📚</span> WPILib Radio Setup Guide</a>
+        </div>
+      </div>
+
+      <!-- COMPONENT: C Buck Converter -->
+      <div class="component-card">
+        <h3>C Buck Converter</h3>
+        <div class="cc-tag">POWER CONVERTER — 12V TO USB-C/BARREL</div>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>Steps 12V robot power (from the Mini Power Module) down to the correct voltage for the Orange Pi 5 (typically 5V via USB-C or a barrel connector at the Pi's required input voltage). Prevents the Pi from being damaged by raw robot power. Select a converter rated for at least 3A output to ensure the Pi can run at full load.</p>
+      </div>
+
+      <!-- COMPONENT: Cameras -->
+      <div class="component-card">
+        <h3>Cameras (USB / IP)</h3>
+        <div class="cc-tag">VISION — USB OR ETHERNET CONNECTED</div>
+        <span class="tag tag-blue">WE USE THIS</span>
+        <p>USB cameras plug into the Orange Pi 5 directly for vision processing, or into the roboRIO's USB ports for basic driver view. IP/GigE cameras connect via Ethernet for higher resolution. Use cameras supported by PhotonVision's hardware list for best results. Always calibrate cameras before using them for pose estimation — calibration files are tied to the specific camera + lens combination.</p>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://docs.photonvision.org/en/latest/docs/hardware/cameras.html" target="_blank"><span class="rl-icon">📚</span> PhotonVision Camera Guide</a>
+        </div>
+      </div>
+
+    </section><!-- END PAGE: COMPONENTS -->
+
+
+    <!-- ============================================================
+         PAGE: NOT USED (components to know about but we don't use)
+         ============================================================ -->
+    <section id="page-not-used" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">REFERENCE</div>
+        <h1>Components We Don't Use</h1>
+        <p class="subtitle">You'll see these on other teams' robots or in older documentation. Know what they are.</p>
+      </div>
+
+      <p style="color:var(--text-muted);margin-bottom:1.5rem;">These components are not on our current robot, but they're common in FRC and you should be able to recognize and understand them. Many teams still use them, and you'll see them at competitions.</p>
+
+      <!-- SPARK MAX -->
+      <div class="component-card">
+        <h3>SPARK MAX Motor Controller</h3>
+        <div class="cc-tag">REV ROBOTICS — BRUSHLESS/BRUSHED MOTOR CONTROLLER</div>
+        <p>The SPARK MAX is REV Robotics' motor controller — the competitor to CTRE's TalonFX. It controls brushless motors (like the REV NEO and NEO 550) or brushed motors. Unlike the Kraken, the SPARK MAX is a separate box that connects between the PDH and the motor. It communicates via CAN Bus or PWM. Very common on teams that use REV hardware.</p>
+      </div>
+
+      <!-- VRM -->
+      <div class="component-card">
+        <h3>VRM — Voltage Regulator Module</h3>
+        <div class="cc-tag">NI / ANDYMARK — LEGACY VOLTAGE REGULATOR</div>
+        <p>An older voltage regulation device that provided 12V and 5V regulated outputs for the radio and other small devices. Now largely replaced by the Mini Power Module and other modern solutions. You may see it on older robots or in older wiring diagrams.</p>
+      </div>
+
+      <!-- Victor SPX -->
+      <div class="component-card">
+        <h3>Victor SPX Motor Controller</h3>
+        <div class="cc-tag">CTRE — BRUSHED MOTOR CONTROLLER (LEGACY)</div>
+        <p>An older CTRE motor controller for brushed motors (like the CIM). Communicates via CAN Bus or PWM. No built-in encoder support. Largely replaced by integrated controllers (like those in the Kraken) but still used on many active robots for mechanism motors where brushless performance isn't necessary.</p>
+      </div>
+
+      <!-- Talon SRX -->
+      <div class="component-card">
+        <h3>Talon SRX Motor Controller</h3>
+        <div class="cc-tag">CTRE — BRUSHED MOTOR CONTROLLER WITH ENCODER SUPPORT</div>
+        <p>A step up from the Victor SPX — the Talon SRX supports external encoders (via a ribbon cable data port) and offers closed-loop PID control on the device itself. CAN or PWM. Common on robots from 2015–2022. You'll still see them at competitions powering CIM motors and other brushed mechanisms.</p>
+      </div>
+
+      <!-- NEO Motor -->
+      <div class="component-card">
+        <h3>NEO Motor (by REV Robotics)</h3>
+        <div class="cc-tag">REV ROBOTICS — BRUSHLESS MOTOR</div>
+        <p>REV's flagship brushless motor, used with the SPARK MAX controller. Comparable in class to the older Falcon 500. Very popular on teams that standardize on REV hardware. Like the Kraken, it has a built-in encoder, but it requires a SPARK MAX controller to operate (it's not self-contained like the Kraken).</p>
+      </div>
+
+      <!-- Falcon 500 -->
+      <div class="component-card">
+        <h3>Falcon 500</h3>
+        <div class="cc-tag">CTRE — BRUSHLESS MOTOR + TALON FX (PREDECESSOR TO KRAKEN)</div>
+        <p>The predecessor to the Kraken X60. Also integrated motor + TalonFX controller, also CAN Bus. Many teams still run Falcon 500s. They're slightly heavier and lower peak power than the Kraken X60 but are proven and reliable. The wiring approach is identical to the Kraken — power from PDH, CAN from bus.</p>
+      </div>
+
+      <!-- CIM Motor -->
+      <div class="component-card">
+        <h3>CIM Motor</h3>
+        <div class="cc-tag">VEXPRO — BRUSHED DC MOTOR (CLASSIC FRC)</div>
+        <p>The classic FRC motor for over a decade. Brushed DC, requires a separate motor controller (Talon SRX, Victor SPX, etc.). No built-in encoder. Generates more heat than brushless motors and is less efficient. Now largely replaced by brushless motors, but you'll see them everywhere on older robots.</p>
+      </div>
+
+      <!-- Limelight -->
+      <div class="component-card">
+        <h3>Limelight Vision Camera</h3>
+        <div class="cc-tag">LIMELIGHT ROBOTICS — INTEGRATED VISION SYSTEM</div>
+        <p>The Limelight is a self-contained camera + processing board in one package. It connects via Ethernet to the robot's network and publishes targeting data (target angle, distance, AprilTag pose) to NetworkTables, which the roboRIO reads. An alternative to the Orange Pi 5 + PhotonVision approach. Some teams prefer it for its plug-and-play simplicity. Powers from 12V via the VRM or MPM. At the time of writing, the Limelight 4 is the current model.</p>
+        <div class="resource-grid" style="margin-top:1rem;">
+          <a class="resource-link" href="https://docs.limelightvision.io" target="_blank"><span class="rl-icon">📚</span> Limelight Documentation</a>
+        </div>
+      </div>
+
+      <!-- REV Blinkin -->
+      <div class="component-card">
+        <h3>REV Blinkin LED Controller</h3>
+        <div class="cc-tag">REV ROBOTICS — LED CONTROLLER</div>
+        <p>The REV Blinkin controls addressable and non-addressable LED strips on the robot. It connects via PWM to the roboRIO and can play pre-programmed light patterns by selecting a PWM value. Used for alliance color indicators, game state signaling, or just aesthetics. Note: the WS2812B strips covered below can also be controlled directly from the roboRIO's Addressable LED port without needing a Blinkin.</p>
+      </div>
+
+      <!-- Addressable LEDs -->
+      <div class="component-card">
+        <h3>Addressable LEDs (WS2812B / NeoPixels)</h3>
+        <div class="cc-tag">VARIOUS — LED STRIPS</div>
+        <p>WS2812B is a type of LED strip where each LED can be individually programmed to any color. In FRC, the roboRIO has a dedicated Addressable LED port (DIO 9 / MXP) that supports WS2812B strips directly with WPILib's AddressableLED class. Common uses: displaying alliance color, game state, whether the robot has a game piece, etc. Power the strips from a 5V source (not directly from 12V) — typically a dedicated channel on the PDH through a buck converter.</p>
+      </div>
+
+      <!-- Limit Switches / Magnetic Sensors -->
+      <div class="component-card">
+        <h3>Limit Switches / Magnetic Sensors</h3>
+        <div class="cc-tag">VARIOUS — DIGITAL SENSORS</div>
+        <p>Simple binary sensors — they're either ON or OFF. Limit switches are physical switches triggered by contact (like a button pushed by a mechanism reaching its travel limit). Magnetic sensors (Hall effect) detect the presence of a magnet without physical contact. Both connect to the roboRIO's DIO (Digital Input/Output) ports. Used for mechanism end stops, game piece detection, homing routines, etc.</p>
+      </div>
+
+      <!-- Pneumatics -->
+      <div class="component-card">
+        <h3>Pneumatics (PCM/PCMH, Compressor, Solenoids)</h3>
+        <div class="cc-tag">REV / CTRE — PNEUMATIC CONTROL</div>
+        <p>Pneumatics use compressed air to actuate cylinders (like pneumatic pistons) for fast, powerful linear motion. The system includes: a <strong>compressor</strong> (pumps air, runs from the PDH), <strong>solenoids</strong> (valves that direct air to cylinders), and a <strong>PCM/PCMH</strong> (Pneumatic Control Module/Hub — manages the compressor and solenoids via CAN Bus). Pneumatics are powerful for grabbers, shooters, and any mechanism needing a fast linear push. They add weight and complexity — weigh the tradeoffs carefully. Note: pneumatics are governed by specific FRC rules about max pressure (120 PSI storage, 60 PSI working) and require a pressure relief valve.</p>
+      </div>
+
+      <!-- USB Hub -->
+      <div class="component-card">
+        <h3>USB Hub</h3>
+        <div class="cc-tag">VARIOUS — USB EXPANSION</div>
+        <p>A powered USB hub connected to the roboRIO's USB port allows connecting multiple USB cameras or devices. The roboRIO only has 2 USB-A ports, so a hub is needed when more USB devices are required. Use a <strong>powered</strong> hub (with its own power input from a 5V source) to prevent the roboRIO from being overwhelmed by powering multiple cameras through its USB bus.</p>
+      </div>
+
+      <!-- Fuse Holders / Blade Fuses -->
+      <div class="component-card">
+        <h3>Fuse Holders / Blade Fuses</h3>
+        <div class="cc-tag">VARIOUS — OVERCURRENT PROTECTION</div>
+        <p>Inline fuse holders are used to add overcurrent protection on individual wires outside the PDH. Blade fuses (the same type as in a car's fuse box) are the most common type in FRC. Always match fuse rating to the wire gauge — the fuse is designed to blow before the wire melts. Typical ratings: 30A for large mechanism motors, 10A for small mechanisms, 5A for sensors and lights.</p>
+      </div>
+
+    </section><!-- END PAGE: NOT USED -->
+
+
+    <!-- ============================================================
+         PAGE: WIRING DIAGRAMS
+         ============================================================ -->
+    <section id="page-wiring" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">REFERENCE</div>
+        <h1>Wiring Diagrams</h1>
+        <p class="subtitle">Real wiring examples — replace placeholders with your team's actual diagrams.</p>
+      </div>
+
+      <p style="color:var(--text-muted);margin-bottom:2rem;">Use the image placeholders below to add actual wiring diagrams from your team or other FRC teams. To replace a placeholder: save your image in the <code>/images/</code> folder next to this HTML file, then replace the <code>src</code> value in the <code>&lt;img&gt;</code> tag below with your filename.</p>
+
+      <!-- WIRING SECTION 1: Full Robot Overview -->
+      <div class="content-section">
+        <h2>Full Robot Wiring Overview</h2>
+        <p>A top-down view showing how all electronics are laid out on the robot and how wires route between them.</p>
+
+        <!-- IMAGE PLACEHOLDER: Full wiring overview -->
+        <!-- IMAGE PLACEHOLDER: Replace 'wiring-overview.jpg' with your full wiring diagram photo. Place in /images/ folder. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🗺️</div>
+          <div>FULL ROBOT WIRING OVERVIEW</div>
+          <div class="ph-label">Replace with: images/wiring-overview.jpg</div>
+        </div>
+        <!-- When ready, replace the placeholder above with this: -->
+        <!-- <img src="images/wiring-overview.jpg" alt="Full robot wiring overview diagram" /> -->
+      </div>
+
+      <!-- WIRING SECTION 2: Electronics Board -->
+      <div class="content-section">
+        <h2>Electronics Board Layout</h2>
+        <p>A detailed view of the electronics mounting board showing component positions and wire routing.</p>
+
+        <!-- IMAGE PLACEHOLDER: Electronics board layout -->
+        <!-- IMAGE PLACEHOLDER: Replace 'electronics-board.jpg' with your electronics board photo. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">📋</div>
+          <div>ELECTRONICS BOARD LAYOUT</div>
+          <div class="ph-label">Replace with: images/electronics-board.jpg</div>
+        </div>
+        <!-- <img src="images/electronics-board.jpg" alt="Electronics board layout" /> -->
+      </div>
+
+      <!-- WIRING SECTION 3: Power Chain -->
+      <div class="content-section">
+        <h2>Power Distribution Chain</h2>
+        <p>A diagram specifically showing how power flows from battery through main breaker to PDH and out to all components.</p>
+
+        <!-- IMAGE PLACEHOLDER: Power chain diagram -->
+        <!-- IMAGE PLACEHOLDER: Replace 'power-chain.jpg' with your power chain diagram. Can be a hand-drawn diagram or Visio/Lucidchart export. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">⚡</div>
+          <div>POWER CHAIN DIAGRAM</div>
+          <div class="ph-label">Replace with: images/power-chain.jpg</div>
+        </div>
+        <!-- <img src="images/power-chain.jpg" alt="Power chain diagram" /> -->
+      </div>
+
+      <!-- WIRING SECTION 4: CAN Bus Topology -->
+      <div class="content-section">
+        <h2>CAN Bus Network Topology</h2>
+        <p>A diagram showing how all CAN devices are connected — which devices are on the CANivore bus vs. the roboRIO bus, and the daisy chain order.</p>
+
+        <!-- IMAGE PLACEHOLDER: CAN Bus topology -->
+        <!-- IMAGE PLACEHOLDER: Replace 'can-topology.jpg' with your CAN Bus diagram. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🔗</div>
+          <div>CAN BUS TOPOLOGY DIAGRAM</div>
+          <div class="ph-label">Replace with: images/can-topology.jpg</div>
+        </div>
+        <!-- <img src="images/can-topology.jpg" alt="CAN Bus topology" /> -->
+      </div>
+
+      <!-- WIRING SECTION 5: Community Examples -->
+      <div class="content-section">
+        <h2>Community Wiring Examples</h2>
+        <p>Examples from other FRC teams showing different approaches to robot wiring. These are for learning — always credit the source team.</p>
+
+        <!-- IMAGE PLACEHOLDER: Community example 1 -->
+        <!-- IMAGE PLACEHOLDER: Replace 'community-wiring-1.jpg' with the community example image. ALWAYS credit the team! -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🤝</div>
+          <div>COMMUNITY EXAMPLE #1</div>
+          <div class="ph-label">Replace with: images/community-wiring-1.jpg — Add team credit: "Wiring by Team XXXX"</div>
+        </div>
+
+        <!-- IMAGE PLACEHOLDER: Community example 2 -->
+        <!-- IMAGE PLACEHOLDER: Replace 'community-wiring-2.jpg' with the second community example. -->
+        <div class="img-placeholder">
+          <div class="ph-icon">🤝</div>
+          <div>COMMUNITY EXAMPLE #2</div>
+          <div class="ph-label">Replace with: images/community-wiring-2.jpg — Add team credit: "Wiring by Team XXXX"</div>
+        </div>
+      </div>
+
+    </section><!-- END PAGE: WIRING -->
+
+
+    <!-- ============================================================
+         PAGE: GLOSSARY
+         ============================================================ -->
+    <section id="page-glossary" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">REFERENCE</div>
+        <h1>Glossary</h1>
+        <p class="subtitle">Plain-English definitions for every electrical term used on this site.</p>
+      </div>
+
+      <!-- GLOSSARY ENTRIES: To add a new term, copy a .glossary-item block and fill in your term + definition -->
+      <div class="glossary-grid">
+
+        <div class="glossary-item"><div class="glossary-term">12V</div><div class="glossary-def">12 volts — the standard operating voltage of FRC robots. Everything runs at 12V or a regulated lower voltage derived from it.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Amp / Ampere (A)</div><div class="glossary-def">The unit of electrical current (flow). Like the flow rate of water in a pipe. More amps = more electricity flowing per second.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Autonomous (Auto)</div><div class="glossary-def">The first 15 seconds of an FRC match where the robot runs code without driver input.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Brownout</div><div class="glossary-def">When voltage drops below 6.8V, causing the roboRIO to disable motor outputs to protect itself. Usually caused by drawing too much current from a partially-discharged battery.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Buck Converter</div><div class="glossary-def">A power converter that steps voltage down (e.g., 12V to 5V). Used to power devices that can't handle the robot's full 12V supply.</div></div>
+        <div class="glossary-item"><div class="glossary-term">CANCoder</div><div class="glossary-def">A CTRE absolute magnetic encoder that communicates over CAN Bus. Used in MK5i modules to read the swerve wheel steering angle.</div></div>
+        <div class="glossary-item"><div class="glossary-term">CAN Bus</div><div class="glossary-def">Controller Area Network. A two-wire communication network (yellow/green) shared by all CAN devices. Allows fast, reliable data exchange between the roboRIO and motors/sensors.</div></div>
+        <div class="glossary-item"><div class="glossary-term">CAN ID</div><div class="glossary-def">A unique address number (0–62) assigned to each CAN device. No two devices on the same bus can share a CAN ID.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Daisy Chain</div><div class="glossary-def">Wiring devices in a series — from one to the next to the next — rather than each running a separate wire back to a hub. CAN Bus devices are typically daisy-chained.</div></div>
+        <div class="glossary-item"><div class="glossary-term">DIO</div><div class="glossary-def">Digital Input/Output. Ports on the roboRIO that read or send simple on/off signals. Used for limit switches, beam breaks, encoders, etc.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Encoder</div><div class="glossary-def">A sensor that counts rotations (or fractions of rotations) of a shaft. Tells the code how far a motor has turned — essential for position control.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Field-Oriented Control</div><div class="glossary-def">A swerve drive mode where "forward" always means toward the far end of the field, regardless of which way the robot is facing. Requires the Pigeon 2.0 (or other gyro) for heading.</div></div>
+        <div class="glossary-item"><div class="glossary-term">FMS</div><div class="glossary-def">Field Management System. The competition field's control computer that manages match timing, enables/disables robots, and connects all driver stations.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Gyroscope (Gyro)</div><div class="glossary-def">A sensor that measures rotational rate and heading. The Pigeon 2.0 contains a 3-axis gyro. Used for navigation and field-oriented swerve.</div></div>
+        <div class="glossary-item"><div class="glossary-term">IMU</div><div class="glossary-def">Inertial Measurement Unit. A sensor combining gyroscope + accelerometer (and sometimes magnetometer) to track orientation in 3D. The Pigeon 2.0 is an IMU.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Motor Controller</div><div class="glossary-def">A device that takes a command (from the roboRIO) and converts it into the right PWM/power signal to drive a motor at a desired speed and direction. In Kraken motors, this is built in (TalonFX).</div></div>
+        <div class="glossary-item"><div class="glossary-term">NetworkTables</div><div class="glossary-def">A distributed key-value store used in FRC to share data between the roboRIO, driver station, and vision co-processors like the Orange Pi 5. PhotonVision publishes pose data here.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Odometry</div><div class="glossary-def">Tracking the robot's position on the field using encoder data and gyro heading. Like GPS, but calculated from the robot's own movement history.</div></div>
+        <div class="glossary-item"><div class="glossary-term">PDH</div><div class="glossary-def">Power Distribution Hub. The CTRE device that distributes power from the battery to all robot components through individual fused channels.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Phoenix Tuner X</div><div class="glossary-def">CTRE's configuration and diagnostic software for all Phoenix 6 devices (Krakens, Pigeons, CANivore, etc.). Used to set CAN IDs, update firmware, and tune PIDs.</div></div>
+        <div class="glossary-item"><div class="glossary-term">PID</div><div class="glossary-def">Proportional-Integral-Derivative. A feedback control algorithm that calculates motor output based on the error between desired and actual state. Used for accurate position and velocity control.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Pose</div><div class="glossary-def">The robot's position (X, Y on the field) + orientation (heading angle) combined. Used for autonomous path planning and field-oriented drive.</div></div>
+        <div class="glossary-item"><div class="glossary-term">PWM</div><div class="glossary-def">Pulse Width Modulation. An older way to communicate motor speed commands — a servo signal on a 3-wire cable. Still used for some sensors and legacy controllers. Less capable than CAN Bus.</div></div>
+        <div class="glossary-item"><div class="glossary-term">RSL</div><div class="glossary-def">Robot Signal Light. The mandatory orange indicator light that shows the robot's status (solid = disabled, blinking = enabled). FRC inspection requirement.</div></div>
+        <div class="glossary-item"><div class="glossary-term">roboRIO</div><div class="glossary-def">The mandatory NI robot controller for FRC. Runs robot code, manages CAN Bus, connects to radio and sensors. The "brain" of the robot.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Stall</div><div class="glossary-def">When a motor is spinning (or trying to) but is physically blocked. The motor draws maximum current in a stall — if prolonged, it will overheat. PDH current monitoring can detect stalls.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Swerve Drive</div><div class="glossary-def">A holonomic drivetrain where each wheel module can steer and drive independently, allowing the robot to move in any direction. Requires encoders, a gyro, and complex code.</div></div>
+        <div class="glossary-item"><div class="glossary-term">TalonFX</div><div class="glossary-def">CTRE's integrated motor controller, built into the Kraken X60 and X44 (and previously the Falcon 500). Communicates over CAN Bus, supports closed-loop PID control.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Teleop</div><div class="glossary-def">The operator-controlled period of an FRC match (after autonomous). 135 seconds where the driver controls the robot via the driver station.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Termination Resistor</div><div class="glossary-def">A 120Ω resistor at each end of a CAN Bus chain that prevents signal reflections. The PDH provides one end; the last device on the chain provides the other.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Voltage</div><div class="glossary-def">Electrical "pressure" measured in volts (V). FRC robots run at 12V nominal.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Watt (W)</div><div class="glossary-def">Unit of power. Watts = Volts × Amps. A Kraken X60 can peak at ~1000W. A single PWM servo might use 5W.</div></div>
+        <div class="glossary-item"><div class="glossary-term">WPILib</div><div class="glossary-def">The official FRC programming library, included with VS Code + FRC extensions. Provides Java/C++/Python APIs for all robot hardware and standard FRC patterns.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Yaw</div><div class="glossary-def">Rotation around the vertical axis — turning left or right. The Pigeon 2.0's yaw reading is the robot's compass heading (0–360°).</div></div>
+
+      </div>
+    </section><!-- END PAGE: GLOSSARY -->
+
+
+    <!-- ============================================================
+         PAGE: CHECKLISTS
+         ============================================================ -->
+    <section id="page-checklists" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">SAFETY & COMPETITION</div>
+        <h1>Checklists</h1>
+        <p class="subtitle">Before you touch the robot. Before every match. No exceptions.</p>
+      </div>
+
+      <!-- SAFETY CHECKLIST -->
+      <!-- SECTION: Before You Touch the Robot -->
+      <div class="checklist-section">
+        <h2>🔴 Before You Touch the Robot — Safety</h2>
+        <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:1rem;">Every person on the electrical subteam must be able to complete this list from memory.</p>
+
+        <!-- CHECKLIST ITEMS: Add or remove items by copy/pasting a .checklist-item block -->
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Battery is disconnected or robot is fully powered off</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Main breaker is in the OFF (down) position</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>A second person is present and aware you are working on the robot</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>No loose clothing, dangling jewelry, or lanyards near the robot</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>You have informed a mentor which component you are working on</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>You know where the nearest fire extinguisher is</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>If you smell burning or see smoke after powering on — IMMEDIATELY disconnect battery and get a mentor</label></div>
+
+        <button class="reset-checklist" onclick="resetChecklist(this.previousElementSibling.parentElement)">RESET LIST</button>
+      </div>
+
+      <!-- COMPETITION DAY ELECTRICAL INSPECTION CHECKLIST -->
+      <div class="checklist-section">
+        <h2>🟡 Competition Day — Pre-Match Electrical Inspection</h2>
+        <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:1rem;">Complete before every match. Takes ~3 minutes when done regularly.</p>
+
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Battery fully charged (12.6V+), securely fastened to robot with straps or retention</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Battery connector fully seated — both contacts, no wobble</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Main breaker accessible from outside robot, breaker itself is undamaged</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>All PDH terminals checked — no loose screws, no wires partially pulled out</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>All PDH fuses installed and correct amperage for each channel</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>All Kraken motor CAN and power wires fully seated</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>All Ethernet cables clicked in fully at both ends (radio ↔ roboRIO, radio ↔ Orange Pi)</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Radio status light shows correct color (consult Vivid-Hosting guide for LED meanings)</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>roboRIO boots and connects to driver station (DS shows green lights)</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>RSL light blinking correctly when enabled in driver station</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Phoenix Tuner X — all 8 Krakens + Pigeon + CANCoders show as connected</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Swerve wheels aligned forward (verify CANCoder zero positions in Tuner)</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Orange Pi 5 accessible via browser at correct IP — PhotonVision pipeline active</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>No wires loose/dangling near moving mechanisms</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>No exposed wire insulation damage visible</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Robot passed bumper + mechanical checks with mech/drive team</label></div>
+
+        <button class="reset-checklist" onclick="resetChecklist(this.previousElementSibling.parentElement)">RESET LIST</button>
+      </div>
+
+      <!-- FRC INSPECTION CHECKLIST (electrical-specific) -->
+      <div class="checklist-section">
+        <h2>🔵 FRC Official Inspection — Electrical (Key Items)</h2>
+        <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:1rem;">These are electrical-specific items from the FRC inspection checklist. Review the full game manual for your season's complete list.</p>
+
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>RSL is mounted and visible from outside the robot (inspection requirement)</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Main breaker is accessible and labeled</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Battery connector is the correct FRC-approved type (SB50 Anderson)</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>No exposed energized conductors (all wires insulated or covered)</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>Radio is the approved model (Vivid-Hosting for 2024+)</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>All motors are FRC-legal and correctly listed in inspection form</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>All motor controllers are FRC-legal</label></div>
+        <div class="checklist-item" onclick="toggleCheck(this)"><input type="checkbox" /><label>roboRIO is the current season's image version</label></div>
+
+        <button class="reset-checklist" onclick="resetChecklist(this.previousElementSibling.parentElement)">RESET LIST</button>
+      </div>
+
+    </section><!-- END PAGE: CHECKLISTS -->
+
+
+    <!-- ============================================================
+         PAGE: WHAT'S NEW / CHANGELOG
+         ============================================================ -->
+    <section id="page-changelog" class="page">
+      <div class="lesson-header">
+        <div class="lesson-label">UPDATES</div>
+        <h1>What's New</h1>
+        <p class="subtitle">Mentor-posted updates, new content, and season-specific changes.</p>
+      </div>
+
+      <div class="mentor-note" style="display:block;">
+        <div class="label">🔧 MENTOR INSTRUCTIONS</div>
+        <p>To add a new changelog entry, copy one of the .changelog-item blocks below, change the date (cl-date) and description (cl-text). Entries show newest-first. No coding required — just copy/paste and edit the text inside the tags.</p>
+      </div>
+
+      <!-- CHANGELOG ENTRIES: Copy/paste a .changelog-item block to add a new entry. Newest first. -->
+
+      <!-- CHANGELOG ENTRY: Change the date and description text below -->
+      <div class="changelog-item">
+        <div class="cl-date">2025-01-15 — SEASON KICKOFF</div>
+        <div class="cl-text">Site launched for the 2025 season. All 8 lessons, full component library, glossary, and checklists are live. Wiring diagram placeholders added — replace with real images from the team. Mentors: enable mentor mode to see answer keys.</div>
+      </div>
+
+      <!-- CHANGELOG ENTRY -->
+      <div class="changelog-item">
+        <div class="cl-date">2025-01-20 — COMPONENT UPDATE</div>
+        <div class="cl-text">Updated Kraken X44 section with correct PDH fuse recommendation (30A). Added Pigeon 2.0 mounting note about powering on flat surfaces. [EDIT THIS ENTRY OR DELETE AND REPLACE WITH REAL UPDATES]</div>
+      </div>
+
+      <!-- CHANGELOG ENTRY -->
+      <div class="changelog-item">
+        <div class="cl-date">TEMPLATE — ADD YOUR UPDATES HERE</div>
+        <div class="cl-text">Copy this block, paste it above the others, change the date and description. Remember to put newest entries first. Topics to document: firmware updates, wiring changes, new components added mid-season, quiz corrections, new wiring diagrams added.</div>
+      </div>
+
+      <hr class="divider"/>
+
+      <!-- EXTERNAL RESOURCES SECTION on changelog page -->
+      <h2 style="font-family:var(--font-display);font-size:0.9rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:1rem;">EXTERNAL RESOURCES</h2>
+      <div class="resource-grid">
+        <a class="resource-link" href="https://docs.wpilib.org" target="_blank"><span class="rl-icon">📚</span> WPILib Documentation</a>
+        <a class="resource-link" href="https://pro.docs.ctr-electronics.com" target="_blank"><span class="rl-icon">🔧</span> CTRE Phoenix 6 Docs</a>
+        <a class="resource-link" href="https://docs.revrobotics.com" target="_blank"><span class="rl-icon">⚡</span> REV Robotics Docs</a>
+        <a class="resource-link" href="https://docs.photonvision.org" target="_blank"><span class="rl-icon">👁️</span> PhotonVision Docs</a>
+        <a class="resource-link" href="https://docs.reduxrobotics.com" target="_blank"><span class="rl-icon">🔵</span> Redux Robotics Docs</a>
+        <a class="resource-link" href="https://www.chiefdelphi.com" target="_blank"><span class="rl-icon">💬</span> Chief Delphi Forum</a>
+        <a class="resource-link" href="https://frc-docs.readthedocs.io" target="_blank"><span class="rl-icon">📖</span> FRC Game Manual (ReadTheDocs)</a>
+        <a class="resource-link" href="https://youtube.com" target="_blank"><span class="rl-icon">▶️</span> YouTube FRC Tutorials</a>
+      </div>
+
+    </section><!-- END PAGE: CHANGELOG -->
+
+  </main><!-- END MAIN CONTENT -->
+
+  <!-- ============================================================
+       FOOTER
+       Change the team number and year below.
+       ============================================================ -->
+  <footer>
+    <!-- FOOTER TEXT: Change "XXXX" to your team number, update the year -->
+    FRC ELECTRICAL SUBTEAM — TEAM XXXX &nbsp;|&nbsp; UPDATED 2025 &nbsp;|&nbsp; BUILT FOR ROOKIES AND MENTORS ALIKE ⚡
+  </footer>
+
+</div><!-- END APP ROOT -->
+
+
+<!-- ============================================================
+     PROGRESS TRACKER MODAL
+     This pops up when the user clicks the progress pill in the nav.
+     ============================================================ -->
+<div id="progress-modal">
+  <div id="progress-inner">
+    <h2>YOUR PROGRESS</h2>
+    <!-- Progress bar -->
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
+    </div>
+    <p id="progress-pct" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin:0.35rem 0 0;">0 of 8 lessons complete</p>
+
+    <!-- Progress list: one row per lesson -->
+    <div class="progress-list" id="progress-list">
+      <!-- Populated by JavaScript -->
+    </div>
+
+    <button class="close-modal" onclick="closeProgress()">CLOSE</button>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+  // ============================================================
+  // LESSONS REGISTRY
+  // To add a new lesson, add an entry here AND create a
+  // <section id="page-lX" class="page"> block in the HTML above.
+  // "id" must match the data-page and the section id (page-lX).
+  // ============================================================
+  const LESSONS = [
+    { id: 'l1', title: 'What Is the Electrical System?' },
+    { id: 'l2', title: 'Power — Battery to Everything' },
+    { id: 'l3', title: 'The Brain: roboRIO 2.0' },
+    { id: 'l4', title: 'CAN Bus — The Nervous System' },
+    { id: 'l5', title: 'Motors & Movement' },
+    { id: 'l6', title: 'Sensors & Feedback' },
+    { id: 'l7', title: 'Vision & Communication' },
+    { id: 'l8', title: 'Putting It All Together' },
+  ];
+
+  // ============================================================
+  // PAGES REGISTRY (non-lesson pages)
+  // ============================================================
+  const PAGES = ['home','lessons','components','not-used','wiring','glossary','checklists','changelog'];
+
+  // ============================================================
+  // PROGRESS STORAGE
+  // Stores which lessons the user has completed in localStorage.
+  // ============================================================
+  function getCompleted() {
+    try { return JSON.parse(localStorage.getItem('frc-elec-progress') || '{}'); }
+    catch(e) { return {}; }
+  }
+  function saveCompleted(obj) {
+    try { localStorage.setItem('frc-elec-progress', JSON.stringify(obj)); }
+    catch(e) {}
+  }
+
+  // ============================================================
+  // MARK LESSON COMPLETE
+  // Called when the "Mark Lesson Complete" button is clicked.
+  // ============================================================
+  function markComplete(lessonId) {
+    const completed = getCompleted();
+    completed[lessonId] = true;
+    saveCompleted(completed);
+    // Update the button appearance
+    const btn = document.getElementById('complete-' + lessonId);
+    if (btn) { btn.textContent = '✓ LESSON COMPLETE'; btn.classList.add('done'); btn.disabled = true; }
+    // Update the card on the lessons page
+    updateCardStates();
+    updateProgressPill();
+  }
+
+  // ============================================================
+  // UPDATE CARD STATES (show green checkmarks on completed lessons)
+  // ============================================================
+  function updateCardStates() {
+    const completed = getCompleted();
+    LESSONS.forEach(l => {
+      if (completed[l.id]) {
+        document.querySelectorAll(`.card[onclick*="'${l.id}'"]`).forEach(c => c.classList.add('done'));
+      }
+    });
+  }
+
+  // ============================================================
+  // UPDATE PROGRESS PILL in the nav
+  // ============================================================
+  function updateProgressPill() {
+    const completed = getCompleted();
+    const count = LESSONS.filter(l => completed[l.id]).length;
+    const pct = Math.round((count / LESSONS.length) * 100);
+    const pill = document.getElementById('progress-pill');
+    if (pill) pill.textContent = (count === LESSONS.length ? '✅' : '⬜') + ' ' + pct + '%';
+  }
+
+  // ============================================================
+  // RESTORE COMPLETE BUTTONS on page load
+  // ============================================================
+  function restoreCompleteButtons() {
+    const completed = getCompleted();
+    LESSONS.forEach(l => {
+      if (completed[l.id]) {
+        const btn = document.getElementById('complete-' + l.id);
+        if (btn) { btn.textContent = '✓ LESSON COMPLETE'; btn.classList.add('done'); btn.disabled = true; }
+      }
+    });
+  }
+
+  // ============================================================
+  // SHOW PAGE — switches which page is visible
+  // Called by nav buttons and internal links.
+  // ============================================================
+  function showPage(pageId) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    // Show the requested page
+    const target = document.getElementById('page-' + pageId);
+    if (target) target.classList.add('active');
+    // Update nav link active state
+    document.querySelectorAll('.nav-link').forEach(l => {
+      l.classList.toggle('active', l.dataset.page === pageId);
+    });
+    // Scroll to top
+    window.scrollTo(0, 0);
+  }
+
+  // ============================================================
+  // SHOW LESSON — navigates to a specific lesson page
+  // ============================================================
+  function showLesson(lessonId) {
+    showPage(lessonId);
+  }
+
+  // ============================================================
+  // QUIZ: SELECT OPTION
+  // Highlights the clicked option. Called by each quiz button.
+  // ============================================================
+  function selectOption(btn) {
+    const qId = btn.dataset.q;
+    // Deselect all options in this question
+    document.querySelectorAll(`.quiz-option[data-q="${qId}"]`).forEach(b => {
+      b.classList.remove('correct','wrong','selected');
+    });
+    btn.classList.add('selected');
+    // Store selection
+    btn.closest('.quiz-q').dataset.selected = btn.textContent.charAt(0); // store A/B/C/D
+    btn.closest('.quiz-q').dataset.selectedCorrect = btn.dataset.correct;
+  }
+
+  // ============================================================
+  // QUIZ: SUBMIT — checks answers and shows score
+  // lessonId: e.g. 'l1'
+  // questionIds: array of question div ids e.g. ['l1q1','l1q2','l1q3']
+  // scoreId: id of the score display element
+  // ============================================================
+  function submitQuiz(lessonId, questionIds, scoreId) {
+    let correct = 0;
+    questionIds.forEach(qId => {
+      const qDiv = document.getElementById(qId);
+      if (!qDiv) return;
+      const selectedBtn = qDiv.querySelector('.quiz-option.selected');
+      const allBtns = qDiv.querySelectorAll('.quiz-option');
+      if (selectedBtn) {
+        const isCorrect = selectedBtn.dataset.correct === 'true';
+        if (isCorrect) { selectedBtn.classList.add('correct'); correct++; }
+        else { selectedBtn.classList.add('wrong'); }
+        // Also highlight the correct answer if they got it wrong
+        if (!isCorrect) {
+          allBtns.forEach(b => { if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        }
+      }
+      // Disable all options after submit
+      allBtns.forEach(b => b.onclick = null);
+    });
+
+    const scoreEl = document.getElementById(scoreId);
+    if (scoreEl) {
+      scoreEl.style.display = 'block';
+      const pct = Math.round((correct/questionIds.length)*100);
+      scoreEl.textContent = `You got ${correct} of ${questionIds.length} correct (${pct}%). ${pct === 100 ? '🎉 Perfect!' : pct >= 67 ? '👍 Good work!' : 'Review the lesson and try again.'}`;
+    }
+  }
+
+  // ============================================================
+  // MENTOR MODE TOGGLE
+  // Shows/hides mentor notes and answer keys by adding
+  // a class to the body.
+  // ============================================================
+  function toggleMentor() {
+    document.body.classList.toggle('mentor-mode');
+    const btn = document.getElementById('mentor-toggle');
+    if (document.body.classList.contains('mentor-mode')) {
+      btn.classList.add('active');
+      btn.textContent = 'MENTOR ON';
+    } else {
+      btn.classList.remove('active');
+      btn.textContent = 'MENTOR MODE';
+    }
+  }
+
+  // ============================================================
+  // CHECKLIST TOGGLE
+  // ============================================================
+  function toggleCheck(item) {
+    const cb = item.querySelector('input[type="checkbox"]');
+    cb.checked = !cb.checked;
+    item.classList.toggle('checked', cb.checked);
+  }
+
+  function resetChecklist(container) {
+    container.querySelectorAll('.checklist-item').forEach(item => {
+      item.classList.remove('checked');
+      const cb = item.querySelector('input[type="checkbox"]');
+      if (cb) cb.checked = false;
+    });
+  }
+
+  // ============================================================
+  // PROGRESS MODAL
+  // ============================================================
+  function openProgress() {
+    const modal = document.getElementById('progress-modal');
+    modal.classList.add('open');
+    renderProgressModal();
+  }
+  function closeProgress() {
+    document.getElementById('progress-modal').classList.remove('open');
+  }
+  function renderProgressModal() {
+    const completed = getCompleted();
+    const count = LESSONS.filter(l => completed[l.id]).length;
+    const pct = Math.round((count / LESSONS.length) * 100);
+
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = `${count} of ${LESSONS.length} lessons complete`;
+
+    const list = document.getElementById('progress-list');
+    list.innerHTML = LESSONS.map(l => `
+      <div class="progress-item">
+        <span class="pi-name">${l.id.replace('l','Lesson ')} — ${l.title}</span>
+        <span class="pi-status ${completed[l.id] ? 'done' : 'pending'}">${completed[l.id] ? '✓ DONE' : '○ PENDING'}</span>
+      </div>
+    `).join('');
+  }
+
+  // Close modal when clicking backdrop
+  document.getElementById('progress-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeProgress();
+  });
+
+  // ============================================================
+  // INITIALIZATION — runs when the page first loads
+  // ============================================================
+  window.addEventListener('DOMContentLoaded', function() {
+    restoreCompleteButtons();
+    updateCardStates();
+    updateProgressPill();
+  });
+</script>
+
+</body>
+</html>
